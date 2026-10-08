@@ -7,7 +7,11 @@ import {
   ExternalLink,
   ShieldCheck,
   Globe,
-  X
+  X,
+  Layers,
+  Terminal,
+  Video,
+  Zap
 } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
@@ -50,6 +54,18 @@ export default function App() {
   const manifestoRef = useRef(null);
   const [manifestoProgress, setManifestoProgress] = useState(0);
   const [wordmarkProximity, setWordmarkProximity] = useState(() => [0, 0, 0, 0, 0]);
+  const [heroTilt, setHeroTilt] = useState({ x: 0, y: 0 });
+
+  const handleHeroPointerMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+    setHeroTilt({ x, y });
+  };
+
+  const handleHeroPointerLeave = () => {
+    setHeroTilt({ x: 0, y: 0 });
+  };
 
   // Non-blocking, passive scroll listener for navbar
   useEffect(() => {
@@ -73,32 +89,36 @@ export default function App() {
     };
   }, [activeCaseModal, calendlyModalOpen, mobileMenuOpen]);
 
-  // Automatic Process Counter (1-2-3-4) on scroll via IntersectionObserver
+  // Automatic Process Counter (01 -> 02 -> 03 -> 04) on scroll without clicking
   useEffect(() => {
-    const container = stepsContainerRef.current;
-    if (!container) return;
-    const stepElements = container.querySelectorAll("[data-step]");
-    if (!stepElements || stepElements.length === 0) return;
+    const handleProcessScroll = () => {
+      const container = stepsContainerRef.current;
+      if (!container) return;
+      const stepElements = container.querySelectorAll("[data-step]");
+      if (!stepElements || stepElements.length === 0) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const stepIndex = Number(entry.target.dataset.step);
-            if (!isNaN(stepIndex)) {
-              setActiveStep(stepIndex);
-            }
-          }
-        });
-      },
-      {
-        rootMargin: "-40% 0px -40% 0px",
-        threshold: 0
+      const focalY = window.innerHeight * 0.42;
+      let closestStep = 0;
+      let minDistance = Infinity;
+
+      stepElements.forEach((el, index) => {
+        const rect = el.getBoundingClientRect();
+        const elCenter = rect.top + rect.height * 0.35;
+        const dist = Math.abs(elCenter - focalY);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestStep = index;
+        }
+      });
+
+      if (closestStep >= 0 && closestStep < 4) {
+        setActiveStep((prev) => (prev !== closestStep ? closestStep : prev));
       }
-    );
+    };
 
-    stepElements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    window.addEventListener("scroll", handleProcessScroll, { passive: true });
+    handleProcessScroll();
+    return () => window.removeEventListener("scroll", handleProcessScroll);
   }, []);
 
   // Smooth scroll and step activation on click
@@ -164,97 +184,155 @@ export default function App() {
     setBookingConfirmed(true);
   };
 
-  // Case Studies & Work Items
+  // Case Studies & Work Items (Confidential, high-end agency format matching Arovas)
   const workItems = [
     {
-      id: "campusflow",
-      category: "tech",
-      client: "CampusFlow – Flagship School ERP",
-      title: "Production School Management ERP with Role-Based Dashboards & Razorpay",
-      channels: "React + Vite + Firebase + Razorpay",
+      id: "campusflow-erp",
+      category: "products",
+      client: "Education institution",
+      shortTitle: "CampusFlow ERP",
+      title: "A complete school ERP and automated biometric attendance system",
+      channels: "CampusFlow ERP + Biometrics + Fee Automation",
       image: "/images/campusflow.jpg",
-      tag: "Live ERP Demo",
+      tag: "Products",
+      metric: "100% Automated Reconciliation",
+      icon: "Layers",
       liveUrl: "https://campusflow.smrpublicschool.in/",
       overview:
-        "CampusFlow is a production-grade, multi-tier school management ERP system actively piloted in a live school environment. It replaces scattered physical registers and fragmented apps with a unified, role-based operating system.",
+        "A production-grade, multi-tier school management ERP system actively piloted in a live school environment. Replaces physical registers and fragmented apps with a unified, role-based operating system.",
       highlights: [
         "Four dedicated portals: Admin, Teacher, Student, Parent",
-        "Firebase Authentication with custom school registration IDs",
-        "Firestore real-time data model for attendance, timetables, assignments & exams",
-        "Razorpay fee collection with partial-payment support & auto monthly accrual",
-        "Attendance-linked staff payroll engine with admin approval workflows"
+        "Biometric device integration and automated parent SMS notifications",
+        "Firestore real-time data model for attendance, timetables, and exams",
+        "Razorpay fee collection with partial-payment support & auto monthly accrual"
       ],
-      techStack: "React, Vite, Firebase Auth, Cloud Firestore, Razorpay API, TailwindCSS",
+      techStack: "React, Vite, Firebase Auth, Cloud Firestore, Razorpay API",
       result: "100% automated fee reconciliation and zero attendance discrepancy."
     },
     {
-      id: "hackculture",
-      category: "hackathons",
-      client: "HackCulture – Devnovate Model",
-      title: "Collegiate Hackathon & Sprint Engine with Auto-Matching & Radar Scoring",
-      channels: "Hackathons + Sprints + Communities",
+      id: "hackculture-platform",
+      category: "campus",
+      client: "National student hackathon",
+      shortTitle: "HackCulture Engine",
+      title: "A pan-India hackathon platform with automated team matching",
+      channels: "HackCulture + 40+ Campuses",
       image: "/images/hackculture.jpg",
-      tag: "Hackathon Platform",
+      tag: "Campus",
+      metric: "2,500+ Devs Active",
+      icon: "Terminal",
       liveUrl: "https://devnovate.co/",
       overview:
-        "Inspired by Devnovate, HackCulture is our all-in-one platform for hosting and scaling hackathons across colleges and tech hubs. It streamlines the chaotic logistics of 500+ participant events.",
+        "Our all-in-one platform for hosting and scaling hackathons across universities and tech hubs. Streamlines registration, algorithmic team matching, and multi-criteria radar scoring.",
       highlights: [
-        "One-click participant registration with GitHub & LinkedIn verification",
-        "Automated AI team-matching matrix based on complementary skills",
-        "Multi-criteria judges scoring radar with live fraud/plagiarism checks",
+        "1-click participant registration with GitHub & LinkedIn verification",
+        "Automated team-matching matrix based on complementary developer skills",
+        "Multi-criteria judges scoring radar with live submission review",
         "Dynamic real-time leaderboard and automated certificate distribution"
       ],
-      techStack: "Next.js, Node.js, WebSockets, Redis, PostgreSQL, AWS",
+      techStack: "Next.js, Node.js, WebSockets, Redis, PostgreSQL",
       result: "Powering hackathons with 2,500+ devs and 40+ college chapters."
     },
     {
-      id: "creator-studio",
+      id: "studio-production",
       category: "creator",
-      client: "Divak Creator Lab",
-      title: "In-House 4K Studio & Production for High-Retention Podcasting & Reels",
-      channels: "In-House Production + Viral Content",
+      client: "Tech founder & studio",
+      shortTitle: "4K Studio & Podcasts",
+      title: "In-house 4K studio production, podcasts and viral short-form IP",
+      channels: "4K Studio + Creator Channels",
       image: "/images/creator_studio.jpg",
-      tag: "Creator & Production",
+      tag: "Creator",
+      metric: "18M+ Organic Views",
+      icon: "Video",
       liveUrl: null,
       overview:
-        "Our dedicated in-house production setup ('khud ka content and production'). We write, shoot on cinema-grade cameras, and engineer viral short-form and long-form intellectual property for tech founders and creators.",
+        "Our dedicated in-house production setup ('khud ka content and production'). We write, shoot on cinema-grade cameras, and engineer viral short-form and long-form intellectual property for founders and creators.",
       highlights: [
         "Full studio acoustically treated with multi-cam 4K cinema cameras",
         "Scriptwriting, hook psychology, and thumbnail engineering",
         "End-to-end multi-platform publishing across YouTube, Reels, and X",
         "Creator profile dealing, brand contracts, and rate protection"
       ],
-      techStack: "RED/Sony FX3, DaVinci Resolve Studio, Shure SM7B, Final Cut Pro",
+      techStack: "RED/Sony FX3, DaVinci Resolve Studio, Shure SM7B",
       result: "Over 18M organic views generated across managed creator channels."
     },
     {
-      id: "whitelabel-erp",
-      category: "tech",
-      client: "EdTech & Academy Partners",
-      title: "Turnkey White-Label Software Outsourcing for Institutions & Agencies",
-      channels: "White-Label + Source Code Licensing",
+      id: "whitelabel-outsourcing",
+      category: "software",
+      client: "Enterprise software vendor",
+      shortTitle: "White-Label Turnkey",
+      title: "White-label software outsourcing with turnkey source code licensing",
+      channels: "Turnkey SaaS + Source Code",
       image: "/images/campusflow.jpg",
-      tag: "White-Label Outsourcing",
+      tag: "Software",
+      metric: "12 Partner Deployments",
+      icon: "ShieldCheck",
       liveUrl: "https://campusflow.smrpublicschool.in/",
       overview:
-        "Institutional clients and partner agencies license our tested architectures under their own brand. Complete with multi-tenant isolation, custom domains, and branded mobile apps.",
+        "Institutional clients and partner agencies license our battle-tested architectures under their own brand. Complete with multi-tenant isolation, custom domains, and branded mobile apps.",
       highlights: [
         "100% white-labeled source code and customized UI design skinning",
         "Dedicated cloud infrastructure deployment with zero vendor lock-in",
-        "Turnkey Razorpay, Stripe, and Cashfree gateway setups",
+        "Turnkey Razorpay, Stripe, and Cashfree payment gateway setups",
         "SLA-backed engineering support and feature roadmap expansions"
       ],
       techStack: "React, Node.js, Cloud Firestore, Docker, Kubernetes",
       result: "Deployed across 12 partner academies within 3 weeks of agreement."
     },
     {
-      id: "creator-brand-deal",
+      id: "campus-ambassador",
+      category: "campus",
+      client: "Consumer tech brand",
+      shortTitle: "Campus Network",
+      title: "A campus ambassador programme and experiential on-ground activations",
+      channels: "Campus ambassadors + Colleges",
+      image: "/images/hackculture.jpg",
+      tag: "Campus",
+      metric: "35,000+ Students Reached",
+      icon: "Globe",
+      liveUrl: null,
+      overview:
+        "Activating student communities in tier-1 and tier-2 engineering colleges across India through hands-on hackathons, technical seminars, and student ambassador networks.",
+      highlights: [
+        "On-ground campus booths, student developer registration drives",
+        "Workshops on System Design, Full-Stack Dev, and Open Source",
+        "Direct talent pipeline connecting top performers to hiring companies"
+      ],
+      techStack: "HackCulture Portal, QR Check-in Systems, Ambassador Dashboards",
+      result: "Direct engagement with 35,000+ engineering students across India."
+    },
+    {
+      id: "fintech-portal",
+      category: "software",
+      client: "FinTech startup",
+      shortTitle: "Custom Cloud Engine",
+      title: "High-performance web applications and custom cloud architecture",
+      channels: "Web + Cloud Architecture",
+      image: "/images/campusflow.jpg",
+      tag: "Software",
+      metric: "<80ms API Latency",
+      icon: "Zap",
+      liveUrl: null,
+      overview:
+        "Bespoke technical engineering tailored to exact operational workflows: high-throughput financial microservices, investor dashboards, and bank-grade data security.",
+      highlights: [
+        "Sub-80ms transaction settlement pipeline with Redis caching",
+        "Role-based access control with biometric two-factor verification",
+        "Automated reconciliations with Razorpay and bank webhooks"
+      ],
+      techStack: "Next.js, Go, PostgreSQL, Redis, AWS",
+      result: "Handled ₹45 Cr in simulated quarterly transactions at zero downtime."
+    },
+    {
+      id: "creator-representation",
       category: "creator",
-      client: "Top D2C & Tech Brands",
-      title: "Creator Profile Management, Endorsements & Brand Commercials",
-      channels: "Creator Deals + Brand Commercials",
+      client: "D2C retail brand",
+      shortTitle: "Creator Dealmaking",
+      title: "Creator profile management, rate negotiation and escrow brand deals",
+      channels: "Creator Deals + Commercials",
       image: "/images/creator_studio.jpg",
-      tag: "Creator Management",
+      tag: "Creator",
+      metric: "₹1.2 Cr Closed",
+      icon: "Check",
       liveUrl: null,
       overview:
         "We represent creators with high-affinity tech audiences, structuring high-value brand deals, multi-video campaigns, and ROI-driven product sponsorships.",
@@ -267,23 +345,26 @@ export default function App() {
       result: "Over ₹1.2 Cr in creator brand sponsorships closed in 2024."
     },
     {
-      id: "campus-activations",
-      category: "hackathons",
-      client: "HackCulture Campus League",
-      title: "On-Ground College Activations, Workshops & Ambassador Networks",
-      channels: "150+ Colleges + Campus Ambassadorships",
+      id: "developer-ranking",
+      category: "software",
+      client: "Developer talent network",
+      shortTitle: "Proof-of-Work OS",
+      title: "A verifiable developer proof-of-work ranking platform",
+      channels: "Web Platform + Ranking Engine",
       image: "/images/hackculture.jpg",
-      tag: "Events & Campaigns",
+      tag: "Software",
+      metric: "1,000 Pt DevRank",
+      icon: "Clock",
       liveUrl: null,
       overview:
-        "Activating student communities in tier-1 and tier-2 engineering colleges across India through hands-on hackathons, technical seminars, and student ambassador networks.",
+        "Inspired by VickyBytes: a verifiable developer ranking score out of 1,000, aggregated from shipped code, GitHub commits, and published technical tutorials.",
       highlights: [
-        "On-ground campus booths, student developer registration drives",
-        "Workshops on System Design, Full-Stack Dev, and Open Source",
-        "Direct talent pipeline connecting top performers to hiring companies"
+        "Automated commit analysis and repo quality assessment",
+        "Live technical coding sprints and automated test evaluation",
+        "Direct recruitment matches for venture-backed engineering teams"
       ],
-      techStack: "HackCulture Portal, QR Check-in Systems, Student Ambassador Dashboards",
-      result: "Direct engagement with 35,000+ engineering students across India."
+      techStack: "Python, FastAPI, GitHub GraphQL API, PostgreSQL",
+      result: "Screened 1,400+ developers with 92% interview qualification rate."
     }
   ];
 
@@ -302,7 +383,7 @@ export default function App() {
           <polyline points="8 6 2 12 8 18"></polyline>
         </svg>
       ),
-      title: "Vertical 1: Tailor-Made Custom Software",
+      title: "Practice 1: Tailor-Made Custom Software",
       desc: "Bespoke engineering tailored to your exact operational workflows. We build web applications, high-throughput microservices, mobile apps, and AI automations that scale without breaking.",
       chips: ["Web Applications", "Mobile Apps (iOS & Android)", "API & Microservices", "AI Automation Pipelines", "Enterprise DB Design", "100% IP Ownership"],
       bestFor: "Startups and enterprises needing proprietary software with zero compromises on performance or security."
@@ -316,7 +397,7 @@ export default function App() {
           <line x1="12" y1="17" x2="12" y2="21"></line>
         </svg>
       ),
-      title: "Vertical 2: White Label Software Outsourcing",
+      title: "Practice 2: White Label Software Outsourcing",
       desc: "Battle-tested, turnkey platforms ready to be re-branded and deployed under your company or client name. We handle core engineering, maintenance, and multi-tenant hosting while you retain the customer relationship.",
       chips: ["CampusFlow ERP Licensing", "Agency Software Outsourcing", "Turnkey SaaS Products", "Dedicated Dev Pods", "Custom Domain Skinning", "SLA Support"],
       bestFor: "Agencies wanting to sell software products and institutions looking for instant production-ready solutions."
@@ -427,16 +508,19 @@ export default function App() {
         <div className="wrap nav-inner">
           <a className="logo" href="#top" aria-label="Divak Home">
             <svg className="logo-symbol" viewBox="0 0 64 64" aria-hidden="true">
-              <path d="M32 10 51 54h-10L32 32 23 54H13Z" fill="currentColor"></path>
+              <path
+                d="M19 13h15c11.6 0 19 8.2 19 19s-7.4 19-19 19H19V13zm8.5 7.5v23h6.5c7 0 11-4.5 11-11.5s-4-11.5-11-11.5h-6.5z"
+                fill="currentColor"
+              ></path>
               <ellipse
                 cx="32"
-                cy="39"
+                cy="36"
                 rx="27"
                 ry="8"
                 fill="none"
                 style={{ stroke: "var(--accent)" }}
                 strokeWidth="3.5"
-                transform="rotate(-14 32 39)"
+                transform="rotate(-14 32 36)"
               ></ellipse>
             </svg>
             <span>Divak</span>
@@ -503,7 +587,7 @@ export default function App() {
               </li>
               <li>
                 <a href="#tech" onClick={() => setMobileMenuOpen(false)}>
-                  02 // Two Technical Verticals
+                  02 // What We Do &amp; Capabilities
                 </a>
               </li>
               <li>
@@ -551,14 +635,16 @@ export default function App() {
 
       <main id="main">
         {/* HERO SECTION */}
-        <section id="top" className="hero surface-ink" aria-labelledby="hero-title">
+        <section
+          id="top"
+          className="hero surface-ink"
+          aria-labelledby="hero-title"
+          onPointerMove={handleHeroPointerMove}
+          onPointerLeave={handleHeroPointerLeave}
+        >
           <div className="wrap">
             <div className="hero-grid">
               <div className="hero-copy">
-                <div className="badge-tag">
-                  <span className="badge-dot"></span>
-                  Engineering &bull; White-Label SaaS &bull; Creator Activations
-                </div>
                 <h1 id="hero-title">
                   <span className="hero-line">
                     <span>Engineering tech</span>
@@ -591,103 +677,56 @@ export default function App() {
                 </div>
               </div>
 
-              {/* HERO STAGE / ORBITAL GRAPHIC MATCHING AROVAS */}
+              {/* 3D HERO STAGE & ORBITAL STRUCTURES */}
               <div className="hero-stage">
-                <div className="hero-poster-wrap">
-                  <svg className="hero-poster" viewBox="0 0 100 100" aria-hidden="true">
-                    <defs>
-                      <radialGradient id="poster-sun">
-                        <stop offset="0" style={{ stopColor: "var(--accent-glow)" }}></stop>
-                        <stop offset="0.38" style={{ stopColor: "var(--accent)" }}></stop>
-                        <stop offset="0.62" style={{ stopColor: "var(--accent)", stopOpacity: 0.4 }}></stop>
-                        <stop offset="1" style={{ stopColor: "var(--accent)", stopOpacity: 0 }}></stop>
-                      </radialGradient>
-                      <radialGradient id="poster-blue">
-                        <stop offset="0" style={{ stopColor: "var(--primary-glow)" }}></stop>
-                        <stop offset="0.4" style={{ stopColor: "var(--primary)" }}></stop>
-                        <stop offset="1" style={{ stopColor: "var(--primary)", stopOpacity: 0 }}></stop>
-                      </radialGradient>
-                      <linearGradient id="poster-glass" x1="0" y1="0" x2="1" y2="1">
-                        <stop offset="0" style={{ stopColor: "var(--glass)", stopOpacity: 0.55 }}></stop>
-                        <stop offset="0.5" style={{ stopColor: "var(--secondary)", stopOpacity: 0.18 }}></stop>
-                        <stop offset="1" style={{ stopColor: "var(--primary)", stopOpacity: 0.5 }}></stop>
-                      </linearGradient>
-                    </defs>
+                <div
+                  className="hero-stage-3d"
+                  style={{
+                    transform: `perspective(1200px) rotateX(${-heroTilt.y * 14}deg) rotateY(${heroTilt.x * 18}deg)`
+                  }}
+                >
+                  {/* Ambient Glows */}
+                  <div className="stage-glow-sun"></div>
+                  <div className="stage-glow-blue"></div>
 
-                    {/* Glowing Sun and Blue orbs */}
-                    <circle cx="58" cy="42" r="28" fill="url(#poster-sun)"></circle>
-                    <circle cx="36" cy="62" r="24" fill="url(#poster-blue)"></circle>
+                  {/* Central Open Aura */}
 
-                    {/* Geometric Divak Center Glyph (Monogram D for Divak) */}
-                    <path
-                      className="hero-poster-mark"
-                      d="M 36 22 H 55 C 68 22 78 32 78 49 C 78 66 68 78 55 78 H 36 Z M 46 34 H 54 C 61 34 66 40 66 49 C 66 58 61 66 54 66 H 46 Z"
-                      fill="url(#poster-glass)"
-                      fillRule="evenodd"
-                      style={{ stroke: "var(--glass)", strokeOpacity: 0.5, strokeWidth: "0.4" }}
-                    ></path>
+                  {/* 3D Inclined Orbital Rings */}
+                  <div className="stage-orbital-ring ring-1"></div>
+                  <div className="stage-orbital-ring ring-2"></div>
 
-                    {/* Elliptical Satellite Orbit Path */}
-                    <path
-                      d="M 8 58 A 42 12 -12 1 1 92 40 A 42 12 -12 1 1 8 58"
-                      fill="none"
-                      style={{ stroke: "var(--secondary)", strokeOpacity: 0.45, strokeWidth: "0.3" }}
-                    ></path>
+                  {/* Orbiting 3D Spheres / Globes */}
+                  <div className="stage-globe globe-amber"></div>
+                  <div className="stage-globe globe-emerald"></div>
+                  <div className="stage-globe globe-gold"></div>
 
-                    {/* Outer Orbit Path */}
-                    <ellipse
-                      cx="50"
-                      cy="50"
-                      rx="38"
-                      ry="38"
-                      fill="none"
-                      stroke="var(--line-ink)"
-                      strokeWidth="0.25"
-                      strokeDasharray="2 2"
-                    ></ellipse>
-
-                    {/* Animated Moving Satellites */}
-                    <circle r="1.8" style={{ fill: "var(--accent)" }}>
-                      <animateMotion
-                        dur="20s"
-                        repeatCount="indefinite"
-                        path="M 8 58 A 42 12 -12 1 1 92 40 A 42 12 -12 1 1 8 58"
-                        begin="-0s"
-                      ></animateMotion>
-                    </circle>
-                    <circle r="1.6" style={{ fill: "var(--secondary)" }}>
-                      <animateMotion
-                        dur="20s"
-                        repeatCount="indefinite"
-                        path="M 8 58 A 42 12 -12 1 1 92 40 A 42 12 -12 1 1 8 58"
-                        begin="-4s"
-                      ></animateMotion>
-                    </circle>
-                    <circle r="1.8" style={{ fill: "var(--paper)" }}>
-                      <animateMotion
-                        dur="20s"
-                        repeatCount="indefinite"
-                        path="M 8 58 A 42 12 -12 1 1 92 40 A 42 12 -12 1 1 8 58"
-                        begin="-8s"
-                      ></animateMotion>
-                    </circle>
-                    <circle r="1.6" style={{ fill: "var(--tertiary)" }}>
-                      <animateMotion
-                        dur="20s"
-                        repeatCount="indefinite"
-                        path="M 8 58 A 42 12 -12 1 1 92 40 A 42 12 -12 1 1 8 58"
-                        begin="-12s"
-                      ></animateMotion>
-                    </circle>
-                    <circle r="1.8" style={{ fill: "var(--accent)" }}>
-                      <animateMotion
-                        dur="20s"
-                        repeatCount="indefinite"
-                        path="M 8 58 A 42 12 -12 1 1 92 40 A 42 12 -12 1 1 8 58"
-                        begin="-16s"
-                      ></animateMotion>
-                    </circle>
-                  </svg>
+                  {/* Floating "What We Do" Capsules */}
+                  <div className="stage-badges-wrap">
+                    <div className="stage-badge-item badge-pos-1">
+                      <span className="badge-orb orb-creator"></span>
+                      <span>Creators &amp; Media</span>
+                    </div>
+                    <div className="stage-badge-item badge-pos-2">
+                      <span className="badge-orb orb-social"></span>
+                      <span>Social Content</span>
+                    </div>
+                    <div className="stage-badge-item badge-pos-3">
+                      <span className="badge-orb orb-college"></span>
+                      <span>College Activations</span>
+                    </div>
+                    <div className="stage-badge-item badge-pos-4">
+                      <span className="badge-orb orb-hack"></span>
+                      <span>HackCulture &amp; Sprints</span>
+                    </div>
+                    <div className="stage-badge-item badge-pos-5">
+                      <span className="badge-orb orb-tech"></span>
+                      <span>Web &amp; Technology</span>
+                    </div>
+                    <div className="stage-badge-item badge-pos-6">
+                      <span className="badge-orb orb-saas"></span>
+                      <span>White-Label SaaS</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -703,7 +742,6 @@ export default function App() {
                 </p>
               </div>
               <div className="availability-pill">
-                <span className="badge-dot"></span>
                 <span>
                   Calendly Open: <strong>Weekdays 9–11 PM</strong> | <strong>All Days 9–12</strong>
                 </span>
@@ -713,7 +751,7 @@ export default function App() {
         </section>
 
         {/* MARQUEE BANNER */}
-        <div className="marquee" aria-label="Divak Core Verticals and Capabilities">
+        <div className="marquee" aria-label="Divak Services and Capabilities">
           <div className="marquee-track" aria-hidden="true">
             {[1, 2].map((group) => (
               <React.Fragment key={group}>
@@ -779,9 +817,9 @@ export default function App() {
             </p>
             <div className="manifesto-foot">
               <div>
-                <h3>Two Technical Verticals</h3>
+                <h3>One Team, Code to Campus</h3>
                 <p>
-                  Bespoke tailor-made software engineered to exact specs, alongside proven white-label turnkey products (like CampusFlow ERP) ready for instant branded deployment.
+                  Software engineering, white-label SaaS, campus activations and 4K production sit at the same table, so the idea survives from code to feed.
                 </p>
               </div>
               <div>
@@ -814,129 +852,100 @@ export default function App() {
               </p>
             </div>
 
-            {/* FEATURED: CAMPUSFLOW SCHOOL MANAGEMENT ERP */}
-            <div className="products-grid">
-              <div className="featured-product-card">
-                <div className="featured-product-content">
-                  <div>
-                    <div className="badge-tag" style={{ background: "rgba(91, 107, 42, 0.4)", color: "var(--secondary)" }}>
-                      Flagship Production ERP &bull; Live Demo Active
-                    </div>
-                    <div className="featured-product-head">
+            {/* PRODUCTS: DISPLAYED USING ORIGINAL WEBSITE TEMPLATE */}
+            <div className="work-grid">
+              {/* CAMPUSFLOW ERP */}
+              <article className="work-card">
+                <div
+                  className="work-link"
+                  onClick={() => setActiveCaseModal(workItems[0])}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="work-media">
+                    <img
+                      src="/images/campusflow.jpg"
+                      alt="CampusFlow School Management ERP"
+                      loading="lazy"
+                    />
+                    <span className="work-tag">Live Production ERP</span>
+                    <span className="work-open" aria-hidden="true">
+                      Launch Demo / Architecture <ArrowUpRight className="work-open-icon" size={16} />
+                    </span>
+                  </div>
+                  <div className="work-meta">
+                    <div>
+                      <p className="work-client">Institutional Operating System</p>
                       <h3>CampusFlow – School Management ERP</h3>
-                      <p className="featured-product-desc">
-                        Built and deployed in a live production school environment. A complete institutional operating system replacing paper registers, manual fees calculation, and fragmented communications with four unified role-based dashboards.
-                      </p>
                     </div>
-
-                    <ul className="product-features-list">
-                      <li>
-                        <Check size={18} />
-                        <span><strong>Role-Based Portals:</strong> Dedicated, permission-governed interfaces for Admin, Teacher, Student, and Parent users.</span>
-                      </li>
-                      <li>
-                        <Check size={18} />
-                        <span><strong>Firebase Authentication &amp; Custom School IDs:</strong> Cryptographic role validation with custom school registration IDs.</span>
-                      </li>
-                      <li>
-                        <Check size={18} />
-                        <span><strong>Real-time Firestore Engine:</strong> Sub-second synchronization for daily attendance, timetable generation, assignments &amp; exams.</span>
-                      </li>
-                      <li>
-                        <Check size={18} />
-                        <span><strong>Integrated Razorpay Fee Accrual:</strong> Online payment collection with partial-payment support, automated monthly accrual, and instant receipt generation.</span>
-                      </li>
-                      <li>
-                        <Check size={18} />
-                        <span><strong>Attendance-Linked Payroll:</strong> Automated teacher and staff payroll calculations mapped directly to biometric and daily attendance records with admin approval workflows.</span>
-                      </li>
-                      <li>
-                        <Check size={18} />
-                        <span><strong>Modern Tech Stack:</strong> Engineered with React, Vite, Firebase Auth, Cloud Firestore, Razorpay API, and TailwindCSS.</span>
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="featured-product-actions">
-                    <a
-                      className="btn"
-                      href="https://campusflow.smrpublicschool.in/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span>Launch Live Demo</span>
-                      <ExternalLink className="btn-icon" size={16} />
-                    </a>
-                    <button
-                      className="btn btn-ghost"
-                      onClick={() => setActiveCaseModal(workItems[0])}
-                    >
-                      <span>View ERP Architecture</span>
-                      <ArrowUpRight className="btn-icon" size={16} />
-                    </button>
-                    <button
-                      className="btn btn-ghost"
-                      onClick={() => {
-                        setSelectedServices(["CampusFlow School ERP", "White Label Software Outsourcing"]);
-                        window.location.href = "#contact";
-                      }}
-                    >
-                      <span>Get White-Label License</span>
-                    </button>
+                    <p className="work-channels">
+                      React + Firebase Auth · Firestore Real-Time · Integrated Razorpay &amp; Payroll
+                    </p>
+                    <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
+                      <a
+                        className="btn btn-sm"
+                        href="https://campusflow.smrpublicschool.in/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Launch Demo <ExternalLink size={14} />
+                      </a>
+                      <button
+                        className="btn btn-sm btn-ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveCaseModal(workItems[0]);
+                        }}
+                      >
+                        Architecture <ArrowUpRight size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
+              </article>
 
-                <div className="featured-product-visual">
-                  <img
-                    src="/images/campusflow.jpg"
-                    alt="CampusFlow School Management ERP Admin Dashboard"
-                    loading="lazy"
-                  />
-                  <div className="live-badge-overlay">
-                    <span className="badge-dot"></span>
-                    <span>LIVE PILOT ACTIVE</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECONDARY PRODUCTS: DEVNOVATE REPLICA (HACKCULTURE) & DEVRANK ECOSYSTEM */}
-              <div className="secondary-products-grid">
-                {/* HACKCULTURE / DEVNOVATE REPLICA */}
-                <div className="secondary-product-card">
-                  <div className="secondary-product-visual">
+              {/* HACKCULTURE */}
+              <article className="work-card">
+                <div
+                  className="work-link"
+                  onClick={() => setActiveCaseModal(workItems[1])}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="work-media">
                     <img
                       src="/images/hackculture.jpg"
                       alt="HackCulture Collegiate Hackathon Platform"
                       loading="lazy"
                     />
-                    <div className="live-badge-overlay">
-                      <span>DEVNOVATE MODEL</span>
-                    </div>
+                    <span className="work-tag">Hackathon OS</span>
+                    <span className="work-open" aria-hidden="true">
+                      Explore Platform <ArrowUpRight className="work-open-icon" size={16} />
+                    </span>
                   </div>
-                  <div className="secondary-product-content">
+                  <div className="work-meta">
                     <div>
-                      <div className="badge-tag">Hackathon OS</div>
-                      <h4>HackCulture – Hackathon &amp; Sprints Engine</h4>
-                      <p>
-                        Our complete Devnovate replica and hackathon operating system. Features 1-click registration, algorithmic team auto-matching matrix, real-time code submission review, judges scoring radar, and live dynamic leaderboards.
-                      </p>
-                      <div style={{ marginTop: "1rem" }} className="chips">
-                        <span className="chip">1-Click Signup</span>
-                        <span className="chip">Auto-Team Match</span>
-                        <span className="chip">Judges Radar</span>
-                        <span className="chip">Live Leaderboard</span>
-                      </div>
+                      <p className="work-client">Collegiate &amp; Sprints Engine</p>
+                      <h3>HackCulture – Devnovate Replica &amp; Hackathon Platform</h3>
                     </div>
-                    <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                    <p className="work-channels">
+                      1-Click Registration · Auto-Team Match · Judges Radar · Live Leaderboard
+                    </p>
+                    <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
                       <button
                         className="btn btn-sm btn-ghost"
-                        onClick={() => setActiveCaseModal(workItems[1])}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveCaseModal(workItems[1]);
+                        }}
                       >
                         Explore Platform <ArrowUpRight size={14} />
                       </button>
                       <button
                         className="btn btn-sm"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setSelectedServices(["HackCulture Events & Hackathons"]);
                           window.location.href = "#contact";
                         }}
@@ -946,59 +955,66 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+              </article>
 
-                {/* VICKYBYTES MODEL DEVRANK & TALENT ECOSYSTEM */}
-                <div className="secondary-product-card">
-                  <div className="secondary-product-visual">
+              {/* CREATOR STUDIO & DEVRANK */}
+              <article className="work-card">
+                <div
+                  className="work-link"
+                  onClick={() => setActiveCaseModal(workItems[2])}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <div className="work-media">
                     <img
                       src="/images/creator_studio.jpg"
-                      alt="Creator Studio & Dev Talent Ecosystem"
+                      alt="In-House 4K Studio &amp; Creator Production"
                       loading="lazy"
                     />
-                    <div className="live-badge-overlay">
-                      <span>VICKYBYTES ECOSYSTEM</span>
-                    </div>
+                    <span className="work-tag">Creator &amp; Dev Cloud</span>
+                    <span className="work-open" aria-hidden="true">
+                      Explore Studio Setup <ArrowUpRight className="work-open-icon" size={16} />
+                    </span>
                   </div>
-                  <div className="secondary-product-content">
+                  <div className="work-meta">
                     <div>
-                      <div className="badge-tag">Dev Talent Cloud</div>
-                      <h4>DevRank &amp; Developer Proof-of-Work</h4>
-                      <p>
-                        Inspired by VickyBytes: a verifiable developer ranking score out of 1,000, aggregated from shipped code, GitHub commits, and published technical tutorials. Replaces resume screening for companies hiring top engineers.
-                      </p>
-                      <div style={{ marginTop: "1rem" }} className="chips">
-                        <span className="chip">Proof-of-Work</span>
-                        <span className="chip">DevRank Score</span>
-                        <span className="chip">Machine Challenges</span>
-                        <span className="chip">Vetted Hires</span>
-                      </div>
+                      <p className="work-client">Khud Ka Content &amp; Dev Ecosystem</p>
+                      <h3>In-House 4K Studio &amp; DevRank Talent Cloud</h3>
                     </div>
-                    <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+                    <p className="work-channels">
+                      Acoustic 4K Studio · Sony FX3 Cinema · 1,000 Pt DevRank · 18M+ Organic Views
+                    </p>
+                    <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
                       <button
                         className="btn btn-sm btn-ghost"
-                        onClick={() => setCalendlyModalOpen(true)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveCaseModal(workItems[2]);
+                        }}
                       >
-                        Hire Ranked Talent <ArrowUpRight size={14} />
+                        Explore Studio <ArrowUpRight size={14} />
                       </button>
-                      <a className="btn btn-sm" href="#contact">
-                        Get Started
-                      </a>
+                      <button
+                        className="btn btn-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCalendlyModalOpen(true);
+                        }}
+                      >
+                        Book Studio Call
+                      </button>
                     </div>
                   </div>
                 </div>
-              </div>
+              </article>
             </div>
           </div>
         </section>
 
-        {/* TWO TECHNICAL VERTICALS & SERVICES ACCORDION */}
+        {/* WHAT WE DO & SERVICES ACCORDION */}
         <section id="tech" className="surface-paper band" aria-labelledby="services-title">
           <div className="wrap services">
             <div className="section-head">
-              <div className="badge-tag">
-                <span className="badge-dot"></span>
-                Two Core Verticals &amp; Creative Engine
-              </div>
               <h2 id="services-title">What we do</h2>
               <p>
                 From custom architecture and white-label source code to high-converting creator studios and collegiate hackathons.
@@ -1057,13 +1073,14 @@ export default function App() {
                         <a
                           className="cap-more"
                           href="#contact"
+                          style={{ textDecoration: "underline", textUnderlineOffset: "4px" }}
                           onClick={() => {
                             if (!selectedServices.includes(svc.title)) {
                               setSelectedServices([...selectedServices, svc.title]);
                             }
                           }}
                         >
-                          Book this vertical <ArrowUpRight className="btn-icon" size={16} />
+                          Book this practice <ArrowUpRight className="btn-icon" size={16} />
                         </a>
                       </div>
                     </div>
@@ -1079,18 +1096,19 @@ export default function App() {
           <div className="wrap">
             <div className="work-head">
               <h2 id="work-title" className="work-title">
-                Work<span className="work-count" aria-hidden="true">06</span>
+                Work<span className="work-count" aria-hidden="true">08</span>
               </h2>
               <div className="work-head-side">
                 <p>
-                  Selected software deployments, white-label platforms, and creator activations. Click any card to inspect architecture, metrics, and live demos.
+                  Selected work for brands and institutions across India. Client names are kept confidential; open any project to see the brief and what we did.
                 </p>
                 <div className="filters" role="group" aria-label="Filter work by type">
                   {[
                     { id: "all", label: "All" },
-                    { id: "tech", label: "Tech & ERP" },
-                    { id: "hackathons", label: "Hackathons" },
-                    { id: "creator", label: "Creator & Media" }
+                    { id: "campus", label: "Campus" },
+                    { id: "software", label: "Software" },
+                    { id: "creator", label: "Creator" },
+                    { id: "products", label: "Products" }
                   ].map((filter) => (
                     <button
                       key={filter.id}
@@ -1120,7 +1138,7 @@ export default function App() {
                       <img src={item.image} alt={item.title} loading="lazy" />
                       <span className="work-tag">{item.tag}</span>
                       <span className="work-open" aria-hidden="true">
-                        Explore Case <ArrowUpRight className="work-open-icon" size={16} />
+                        Read the case <ArrowUpRight className="work-open-icon" size={16} />
                       </span>
                     </div>
                     <div className="work-meta">
@@ -1143,7 +1161,6 @@ export default function App() {
             <div className="process-aside">
               <div className="section-head">
                 <div className="badge-tag">
-                  <span className="badge-dot"></span>
                   Agile Delivery Architecture
                 </div>
                 <h2 id="process-title">How we work</h2>
@@ -1267,7 +1284,7 @@ export default function App() {
                 <p>
                   Great code without distribution sits empty. Great marketing without solid engineering collapses under load. Divak was built to fuse both.
                 </p>
-                <footer>Divak Founding Team</footer>
+                <footer>Divyansh &amp; Akshat, Founders</footer>
               </blockquote>
             </div>
 
@@ -1327,15 +1344,15 @@ export default function App() {
                 <div className="founder-photo">
                   <img
                     src="/images/creator_studio.jpg"
-                    alt="Technical &amp; ERP Architecture Lead"
+                    alt="Divyansh - Co-Founder &amp; Technical Architect"
                     loading="lazy"
                   />
                 </div>
                 <div className="founder-meta">
-                  <h3>Lead Product &amp; Systems Architect</h3>
-                  <p className="founder-role">Head of Technical Development &amp; ERP</p>
+                  <h3>Divyansh</h3>
+                  <p className="founder-role">Co-Founder &amp; Technical Architect</p>
                   <p className="founder-bio">
-                    Architected CampusFlow ERP, Firebase multi-tier data structures, and Razorpay automated fee reconciliations. Specializes in custom enterprise apps and white-label SaaS infrastructure.
+                    Architects core enterprise software, CampusFlow school ERP, and white-label SaaS infrastructure. Leads full-stack engineering and cloud systems from first commit to live production.
                   </p>
                 </div>
               </article>
@@ -1344,15 +1361,15 @@ export default function App() {
                 <div className="founder-photo">
                   <img
                     src="/images/hackculture.jpg"
-                    alt="Creative &amp; HackCulture Lead"
+                    alt="Akshat - Co-Founder &amp; Creative Director"
                     loading="lazy"
                   />
                 </div>
                 <div className="founder-meta">
-                  <h3>Lead Creative Director &amp; Activations</h3>
-                  <p className="founder-role">Head of Creator Management &amp; HackCulture</p>
+                  <h3>Akshat</h3>
+                  <p className="founder-role">Co-Founder &amp; Creative Director</p>
                   <p className="founder-bio">
-                    Oversees our in-house 4K studio ('khud ka production'), creator profile negotiations, and 150+ college hackathon networks across India.
+                    Directs in-house 4K cinema studio production ('khud ka production'), creator profile deals, and nationwide HackCulture collegiate hackathon networks across Indian universities.
                   </p>
                 </div>
               </article>
@@ -1364,13 +1381,9 @@ export default function App() {
         <section id="faq" className="surface-paper band" style={{ paddingTop: 0 }} aria-labelledby="faq-title">
           <div className="wrap faq">
             <div className="section-head">
-              <div className="badge-tag">
-                <span className="badge-dot"></span>
-                Clarity First
-              </div>
               <h2 id="faq-title">Questions, answered</h2>
               <p>
-                Everything you need to know about our technical verticals, CampusFlow ERP, white-label licensing, and Calendly availability.
+                Everything you need to know about our services, practices, CampusFlow ERP, white-label licensing, and Calendly availability.
               </p>
             </div>
 
@@ -1464,7 +1477,7 @@ export default function App() {
               {!formSubmitted ? (
                 <form onSubmit={handleFormSubmit}>
                   <fieldset>
-                    <legend>What verticals do you need?</legend>
+                    <legend>What do you need?</legend>
                     <div className="pick">
                       {[
                         "Tailor-Made Custom Software",
@@ -1605,7 +1618,7 @@ export default function App() {
                   </div>
                   <h3>Brief Received!</h3>
                   <p>
-                    Thank you, <strong>{formData.name || "there"}</strong>. We’ve logged your selected verticals:{" "}
+                    Thank you, <strong>{formData.name || "there"}</strong>. We’ve logged your selected services:{" "}
                     <em>{selectedServices.join(", ")}</em>. A founding engineer will review and reach out within 1 working day.
                   </p>
                   <button
@@ -1628,16 +1641,19 @@ export default function App() {
             <div>
               <a className="logo" href="#top" style={{ color: "var(--on-ink)" }}>
                 <svg className="logo-symbol" viewBox="0 0 64 64" aria-hidden="true">
-                  <path d="M32 10 51 54h-10L32 32 23 54H13Z" fill="currentColor"></path>
+                  <path
+                    d="M19 13h15c11.6 0 19 8.2 19 19s-7.4 19-19 19H19V13zm8.5 7.5v23h6.5c7 0 11-4.5 11-11.5s-4-11.5-11-11.5h-6.5z"
+                    fill="currentColor"
+                  ></path>
                   <ellipse
                     cx="32"
-                    cy="39"
+                    cy="36"
                     rx="27"
                     ry="8"
                     fill="none"
                     style={{ stroke: "var(--accent)" }}
                     strokeWidth="3.5"
-                    transform="rotate(-14 32 39)"
+                    transform="rotate(-14 32 36)"
                   ></ellipse>
                 </svg>
                 <span>Divak</span>
@@ -1647,7 +1663,6 @@ export default function App() {
               </p>
               <div style={{ marginTop: "1.25rem" }}>
                 <span className="availability-pill">
-                  <span className="badge-dot"></span>
                   Calendly: Weekdays 9-11 PM &bull; All Days 9-12
                 </span>
               </div>
@@ -1674,7 +1689,7 @@ export default function App() {
             </div>
 
             <div>
-              <h4>Technical Verticals</h4>
+              <h4>What We Do</h4>
               <ul>
                 <li>
                   <a href="#tech">Tailor-Made Custom Software</a>
@@ -1872,7 +1887,7 @@ export default function App() {
             <div className="modal-header">
               <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                 <span className="badge-tag">
-                  <span className="badge-dot"></span> Calendly Integration
+                  Calendly Integration
                 </span>
                 <span style={{ fontSize: "var(--t-xs)", color: "var(--on-ink-muted)" }}>
                   Verified Availability
