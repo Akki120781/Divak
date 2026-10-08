@@ -59,20 +59,9 @@ export default function App() {
   const stepsContainerRef = useRef(null);
   const wordmarkRef = useRef(null);
   const manifestoRef = useRef(null);
+  const lenisRef = useRef(null);
   const [manifestoProgress, setManifestoProgress] = useState(0);
   const [wordmarkProximity, setWordmarkProximity] = useState(() => [0, 0, 0, 0, 0]);
-  const [heroTilt, setHeroTilt] = useState({ x: 0, y: 0 });
-
-  const handleHeroPointerMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
-    setHeroTilt({ x, y });
-  };
-
-  const handleHeroPointerLeave = () => {
-    setHeroTilt({ x: 0, y: 0 });
-  };
 
   // Lenis Smooth Scroll Engine (Matching Arovas Butter-Smooth Kinetic Scroll)
   useEffect(() => {
@@ -82,6 +71,7 @@ export default function App() {
       lerp: 0.1,
       anchors: { offset: -72 }
     });
+    lenisRef.current = lenis;
 
     let rafId = 0;
     const raf = (time) => {
@@ -93,6 +83,7 @@ export default function App() {
     return () => {
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
 
@@ -124,14 +115,17 @@ export default function App() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Modal body scroll lock to prevent scroll conflicts
+  // Modal body scroll lock & Lenis freeze to ensure internal modal scrolling
   useEffect(() => {
     if (activeCaseModal || mobileMenuOpen) {
+      lenisRef.current?.stop();
       document.body.style.overflow = "hidden";
     } else {
+      lenisRef.current?.start();
       document.body.style.overflow = "";
     }
     return () => {
+      lenisRef.current?.start();
       document.body.style.overflow = "";
     };
   }, [activeCaseModal, mobileMenuOpen]);
@@ -683,100 +677,43 @@ export default function App() {
       )}
 
       <main id="main">
-        {/* HERO SECTION */}
+        {/* HERO SECTION - CLEAN CENTERED AESTHETIC */}
         <section
           id="top"
           className="hero surface-ink"
           aria-labelledby="hero-title"
-          onPointerMove={handleHeroPointerMove}
-          onPointerLeave={handleHeroPointerLeave}
         >
           <div className="wrap">
-            <div className="hero-grid">
-              <div className="hero-copy">
-                <h1 id="hero-title">
-                  <span className="hero-line">
-                    <span>Engineering tech</span>
-                  </span>
-                  <span className="hero-line">
-                    <span>that scales, content</span>
-                  </span>
-                  <span className="hero-line">
-                    <span style={{ color: "var(--accent)" }}>that converts.</span>
-                  </span>
-                </h1>
-                <p className="hero-sub">
-                  Divak is a hybrid technology development studio and activation engine in India.
-                  We build custom tailor-made software, license battle-tested white-label SaaS like{" "}
-                  <strong>CampusFlow School ERP</strong>, produce viral creator content, and run
-                  nationwide hackathon cultures.
-                </p>
-                <div className="hero-actions">
-                  <a className="btn" href="#products">
-                    <span>Explore Products</span>
-                    <ArrowUpRight className="btn-icon" size={18} />
-                  </a>
-                  <button
-                    className="btn btn-ghost"
-                    onClick={openCalendly}
-                  >
-                    <Clock size={18} />
-                    <span>Book Call (Weekdays 9-11 PM / All Days 9-12)</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* 3D HERO STAGE & ORBITAL STRUCTURES */}
-              <div className="hero-stage">
-                <div
-                  className="hero-stage-3d"
-                  style={{
-                    transform: `perspective(1200px) rotateX(${-heroTilt.y * 14}deg) rotateY(${heroTilt.x * 18}deg)`
-                  }}
+            <div className="hero-centered">
+              <h1 id="hero-title">
+                <span className="hero-line">
+                  <span>Engineering tech</span>
+                </span>
+                <span className="hero-line">
+                  <span>that scales, content</span>
+                </span>
+                <span className="hero-line">
+                  <span style={{ color: "var(--accent)" }}>that converts.</span>
+                </span>
+              </h1>
+              <p className="hero-sub">
+                Divak is a tailor-made technology development studio and activation engine in India.
+                We build bespoke software, license battle-tested enterprise architectures like{" "}
+                <strong>CampusFlow School ERP</strong>, produce in-house 4K creator content, and run
+                nationwide collegiate hackathons.
+              </p>
+              <div className="hero-actions">
+                <a className="btn" href="#products">
+                  <span>Explore Products</span>
+                  <ArrowUpRight className="btn-icon" size={18} />
+                </a>
+                <button
+                  className="btn btn-ghost"
+                  onClick={openCalendly}
                 >
-                  {/* Ambient Glows */}
-                  <div className="stage-glow-sun"></div>
-                  <div className="stage-glow-blue"></div>
-
-                  {/* Central Open Aura */}
-
-                  {/* 3D Inclined Orbital Rings */}
-                  <div className="stage-orbital-ring ring-1"></div>
-                  <div className="stage-orbital-ring ring-2"></div>
-
-                  {/* Orbiting 3D Spheres / Globes */}
-                  <div className="stage-globe globe-amber"></div>
-                  <div className="stage-globe globe-emerald"></div>
-                  <div className="stage-globe globe-gold"></div>
-
-                  {/* Floating "What We Do" Capsules */}
-                  <div className="stage-badges-wrap">
-                    <div className="stage-badge-item badge-pos-1">
-                      <span className="badge-orb orb-creator"></span>
-                      <span>Creators &amp; Media</span>
-                    </div>
-                    <div className="stage-badge-item badge-pos-2">
-                      <span className="badge-orb orb-social"></span>
-                      <span>Social Content</span>
-                    </div>
-                    <div className="stage-badge-item badge-pos-3">
-                      <span className="badge-orb orb-college"></span>
-                      <span>College Activations</span>
-                    </div>
-                    <div className="stage-badge-item badge-pos-4">
-                      <span className="badge-orb orb-hack"></span>
-                      <span>HackCulture &amp; Sprints</span>
-                    </div>
-                    <div className="stage-badge-item badge-pos-5">
-                      <span className="badge-orb orb-tech"></span>
-                      <span>Web &amp; Technology</span>
-                    </div>
-                    <div className="stage-badge-item badge-pos-6">
-                      <span className="badge-orb orb-saas"></span>
-                      <span>White-Label SaaS</span>
-                    </div>
-                  </div>
-                </div>
+                  <Clock size={18} />
+                  <span>Book Call (Weekdays 9-11 PM / All Days 9-12)</span>
+                </button>
               </div>
             </div>
 
@@ -899,159 +836,67 @@ export default function App() {
 
             {/* PRODUCTS: DISPLAYED USING ORIGINAL WEBSITE TEMPLATE */}
             <div className="work-grid">
-              {/* CAMPUSFLOW ERP */}
-              <article className="work-card">
-                <div
-                  className="work-link"
-                  onClick={() => setActiveCaseModal(workItems[0])}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className="work-media">
-                    <img
-                      src="/work/campusflow.svg"
-                      alt="CampusFlow School Management ERP"
-                      loading="lazy"
-                    />
-                    <span className="work-tag">Live Production ERP</span>
-                    <span className="work-open" aria-hidden="true">
-                      Launch Demo / Architecture <ArrowUpRight className="work-open-icon" size={16} />
-                    </span>
-                  </div>
-                  <div className="work-meta">
-                    <div>
-                      <p className="work-client">Institutional Operating System</p>
-                      <h3>CampusFlow – School Management ERP</h3>
+              {workItems.slice(0, 3).map((item) => (
+                <article key={item.id} className="work-card">
+                  <div
+                    className="work-link"
+                    onClick={() => setActiveCaseModal(item)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="work-media">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        loading="lazy"
+                      />
+                      <span className="work-tag">{item.tag}</span>
+                      <span className="work-open" aria-hidden="true">
+                        Read the case <ArrowUpRight className="work-open-icon" size={16} />
+                      </span>
                     </div>
-                    <p className="work-channels">
-                      React + Firebase Auth · Firestore Real-Time · Integrated Razorpay &amp; Payroll
-                    </p>
-                    <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
-                      <a
-                        className="btn btn-sm"
-                        href="https://campusflow.smrpublicschool.in/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Launch Demo <ExternalLink size={14} />
-                      </a>
+                    <div className="work-meta">
+                      <div>
+                        <p className="work-client">{item.client}</p>
+                        <h3>{item.title}</h3>
+                      </div>
+                      <p className="work-channels">{item.channels}</p>
+                    </div>
+                    <div className="work-card-actions">
                       <button
                         className="btn btn-sm btn-ghost"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveCaseModal(workItems[0]);
+                          setActiveCaseModal(item);
                         }}
                       >
                         Architecture <ArrowUpRight size={14} />
                       </button>
+                      {item.liveUrl ? (
+                        <a
+                          className="btn btn-sm"
+                          href={item.liveUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Launch Demo <ExternalLink size={14} />
+                        </a>
+                      ) : (
+                        <button
+                          className="btn btn-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openCalendly();
+                          }}
+                        >
+                          Book Studio Call <ArrowUpRight size={14} />
+                        </button>
+                      )}
                     </div>
                   </div>
-                </div>
-              </article>
-
-              {/* HACKCULTURE */}
-              <article className="work-card">
-                <div
-                  className="work-link"
-                  onClick={() => setActiveCaseModal(workItems[1])}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className="work-media">
-                    <img
-                      src="/work/hackculture.svg"
-                      alt="HackCulture Collegiate Hackathon Platform"
-                      loading="lazy"
-                    />
-                    <span className="work-tag">Hackathon OS</span>
-                    <span className="work-open" aria-hidden="true">
-                      Explore Platform <ArrowUpRight className="work-open-icon" size={16} />
-                    </span>
-                  </div>
-                  <div className="work-meta">
-                    <div>
-                      <p className="work-client">Collegiate &amp; Sprints Engine</p>
-                      <h3>HackCulture – Devnovate Replica &amp; Hackathon Platform</h3>
-                    </div>
-                    <p className="work-channels">
-                      1-Click Registration · Auto-Team Match · Judges Radar · Live Leaderboard
-                    </p>
-                    <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
-                      <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveCaseModal(workItems[1]);
-                        }}
-                      >
-                        Explore Platform <ArrowUpRight size={14} />
-                      </button>
-                      <button
-                        className="btn btn-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedServices(["HackCulture Events & Hackathons"]);
-                          window.location.href = "#contact";
-                        }}
-                      >
-                        Host a Hackathon
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-
-              {/* CREATOR STUDIO & DEVRANK */}
-              <article className="work-card">
-                <div
-                  className="work-link"
-                  onClick={() => setActiveCaseModal(workItems[2])}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <div className="work-media">
-                    <img
-                      src="/work/creator_studio.svg"
-                      alt="In-House 4K Studio &amp; Creator Production"
-                      loading="lazy"
-                    />
-                    <span className="work-tag">Creator &amp; Dev Cloud</span>
-                    <span className="work-open" aria-hidden="true">
-                      Explore Studio Setup <ArrowUpRight className="work-open-icon" size={16} />
-                    </span>
-                  </div>
-                  <div className="work-meta">
-                    <div>
-                      <p className="work-client">Khud Ka Content &amp; Dev Ecosystem</p>
-                      <h3>In-House 4K Studio &amp; DevRank Talent Cloud</h3>
-                    </div>
-                    <p className="work-channels">
-                      Acoustic 4K Studio · Sony FX3 Cinema · 1,000 Pt DevRank · 18M+ Organic Views
-                    </p>
-                    <div style={{ display: "flex", gap: "0.6rem", marginTop: "0.85rem", flexWrap: "wrap" }}>
-                      <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveCaseModal(workItems[2]);
-                        }}
-                      >
-                        Explore Studio <ArrowUpRight size={14} />
-                      </button>
-                      <button
-                        className="btn btn-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openCalendly();
-                        }}
-                      >
-                        Book Studio Call
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
+                </article>
+              ))}
             </div>
           </div>
         </section>
@@ -1205,9 +1050,6 @@ export default function App() {
           <div className="wrap process">
             <div className="process-aside">
               <div className="section-head">
-                <div className="badge-tag">
-                  Agile Delivery Architecture
-                </div>
                 <h2 id="process-title">How we work</h2>
                 <p>
                   A battle-tested progression from first architectural scoping to live production monitoring and revenue accrual.
@@ -1242,11 +1084,6 @@ export default function App() {
                 >
                   <div className="step-top">
                     <span className="step-num">{step.num}</span>
-                    {activeStep === idx && (
-                      <span className="badge-tag" style={{ background: "var(--accent)", color: "var(--on-accent)" }}>
-                        Current Stage
-                      </span>
-                    )}
                   </div>
                   <h3>{step.title}</h3>
                   <p>{step.desc}</p>
@@ -1267,10 +1104,6 @@ export default function App() {
         <section className="surface-paper band" aria-labelledby="promise-title">
           <div className="wrap">
             <div className="section-head">
-              <div className="badge-tag">
-                <span className="badge-dot"></span>
-                Institutional Integrity
-              </div>
               <h2 id="promise-title">What you can count on</h2>
               <p>Engineering discipline and creative accountability written into every contract.</p>
             </div>
@@ -1366,10 +1199,6 @@ export default function App() {
         <section id="team" className="surface-paper band" aria-labelledby="team-title">
           <div className="wrap team-layout">
             <div className="founders-head">
-              <div className="badge-tag">
-                <span className="badge-dot"></span>
-                Accountability
-              </div>
               <h2 id="team-title">The people on your account</h2>
               <p>
                 Technical and creative founders on every account. The engineers who architect your system are the ones in your sprint reviews.
@@ -1467,9 +1296,6 @@ export default function App() {
         <section id="contact" className="surface-accent band" aria-labelledby="contact-title">
           <div className="wrap contact">
             <div>
-              <div className="badge-tag" style={{ background: "rgba(30, 35, 20, 0.25)", color: "var(--ink)" }}>
-                Start an Engagement
-              </div>
               <h2 id="contact-title">Got a product to engineer?</h2>
               <p className="contact-lede">
                 Tell us about your technical requirements or creator brief. We review every submission within 1 business day with actionable next steps.
@@ -1813,11 +1639,19 @@ export default function App() {
 
       {/* CASE STUDY DETAIL MODAL */}
       {activeCaseModal && (
-        <div className="modal-backdrop" onClick={() => setActiveCaseModal(null)}>
-          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal-backdrop"
+          data-lenis-prevent="true"
+          onClick={() => setActiveCaseModal(null)}
+        >
+          <div
+            className="modal-sheet"
+            data-lenis-prevent="true"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="modal-header">
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <span className="badge-tag">{activeCaseModal.tag}</span>
+                <span className="work-tag" style={{ position: "static" }}>{activeCaseModal.tag}</span>
                 <span style={{ fontSize: "var(--t-sm)", color: "var(--on-ink-muted)" }}>
                   {activeCaseModal.channels}
                 </span>
