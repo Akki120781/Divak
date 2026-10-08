@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 import {
   ArrowUpRight,
   Check,
@@ -15,6 +17,7 @@ import {
 } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
+const CALENDLY_URL = "https://calendly.com/goyaldivyansh2004";
 const wordmarkLetters = ["D", "I", "V", "A", "K"];
 const manifestoWords =
   "Most software agencies write code that gathers dust. Most creative agencies make noise that gets scrolled past. We build the high-conviction intersection: production-grade systems engineered for operational scale, coupled with creator-led activations and hackathon cultures that command real audience attention.".split(
@@ -24,14 +27,12 @@ const manifestoWords =
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [navSolid, setNavSolid] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
   const [activeWorkFilter, setActiveWorkFilter] = useState("all");
   const [activeStep, setActiveStep] = useState(0);
   const [openService, setOpenService] = useState("custom-tech");
   const [openFaq, setOpenFaq] = useState(0);
   const [activeCaseModal, setActiveCaseModal] = useState(null);
-  const [calendlyModalOpen, setCalendlyModalOpen] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [bookingConfirmed, setBookingConfirmed] = useState(false);
 
   // Form State
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -47,6 +48,12 @@ export default function App() {
     brief: "",
     timeSlot: "Weekdays (9:00 PM – 11:00 PM)"
   });
+
+  // Direct Calendly Redirect
+  const openCalendly = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    window.open(CALENDLY_URL, "_blank", "noopener,noreferrer");
+  };
 
   // Refs for scroll-driven animations
   const stepsContainerRef = useRef(null);
@@ -67,19 +74,59 @@ export default function App() {
     setHeroTilt({ x: 0, y: 0 });
   };
 
-  // Non-blocking, passive scroll listener for navbar
+  // Lenis Smooth Scroll Engine (Matching Arovas Butter-Smooth Kinetic Scroll)
   useEffect(() => {
-    const handleScroll = () => {
-      const isSolid = window.scrollY > 40;
-      setNavSolid((prev) => (prev !== isSolid ? isSolid : prev));
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const lenis = new Lenis({
+      lerp: 0.1,
+      anchors: { offset: -72 }
+    });
+
+    let rafId = 0;
+    const raf = (time) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
     };
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, []);
+
+  // Navbar behavior: hide on scroll down, reveal on scroll up
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentY = window.scrollY;
+          setNavSolid(currentY > 40);
+
+          if (currentY > 120 && currentY > lastScrollY + 6) {
+            setNavHidden(true);
+          } else if (currentY < lastScrollY - 6 || currentY <= 60) {
+            setNavHidden(false);
+          }
+
+          lastScrollY = currentY;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // Modal body scroll lock to prevent scroll conflicts
   useEffect(() => {
-    if (activeCaseModal || calendlyModalOpen || mobileMenuOpen) {
+    if (activeCaseModal || mobileMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -87,38 +134,28 @@ export default function App() {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [activeCaseModal, calendlyModalOpen, mobileMenuOpen]);
+  }, [activeCaseModal, mobileMenuOpen]);
 
-  // Automatic Process Counter (01 -> 02 -> 03 -> 04) on scroll without clicking
+  // Automatic Process Counter (01 -> 02 -> 03 -> 04) with IntersectionObserver (matching Arovas)
   useEffect(() => {
-    const handleProcessScroll = () => {
-      const container = stepsContainerRef.current;
-      if (!container) return;
-      const stepElements = container.querySelectorAll("[data-step]");
-      if (!stepElements || stepElements.length === 0) return;
+    const container = stepsContainerRef.current;
+    if (!container) return;
+    const stepElements = container.querySelectorAll("[data-step]");
+    if (!stepElements || stepElements.length === 0) return;
 
-      const focalY = window.innerHeight * 0.42;
-      let closestStep = 0;
-      let minDistance = Infinity;
-
-      stepElements.forEach((el, index) => {
-        const rect = el.getBoundingClientRect();
-        const elCenter = rect.top + rect.height * 0.35;
-        const dist = Math.abs(elCenter - focalY);
-        if (dist < minDistance) {
-          minDistance = dist;
-          closestStep = index;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveStep(Number(entry.target.dataset.step));
+          }
         }
-      });
+      },
+      { rootMargin: "-45% 0px -45% 0px" }
+    );
 
-      if (closestStep >= 0 && closestStep < 4) {
-        setActiveStep((prev) => (prev !== closestStep ? closestStep : prev));
-      }
-    };
-
-    window.addEventListener("scroll", handleProcessScroll, { passive: true });
-    handleProcessScroll();
-    return () => window.removeEventListener("scroll", handleProcessScroll);
+    stepElements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
   // Smooth scroll and step activation on click
@@ -130,18 +167,30 @@ export default function App() {
     }
   };
 
-  // Manifesto word-by-word illumination on scroll
+  // Manifesto word-by-word illumination on scroll (RAF throttled)
   useEffect(() => {
+    let ticking = false;
+    let lastProgress = 0;
+
     const handleManifestoScroll = () => {
-      const el = manifestoRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-      const start = windowHeight * 0.85;
-      const end = windowHeight * 0.35;
-      const current = rect.top;
-      const progress = Math.min(1, Math.max(0, (start - current) / (start - end)));
-      setManifestoProgress(progress);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const el = manifestoRef.current;
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            const start = windowHeight * 0.85;
+            const end = windowHeight * 0.35;
+            const progress = Math.min(1, Math.max(0, (start - rect.top) / (start - end)));
+            if (Math.abs(progress - lastProgress) > 0.015) {
+              setManifestoProgress(progress);
+              lastProgress = progress;
+            }
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     window.addEventListener("scroll", handleManifestoScroll, { passive: true });
@@ -193,7 +242,7 @@ export default function App() {
       shortTitle: "CampusFlow ERP",
       title: "A complete school ERP and automated biometric attendance system",
       channels: "CampusFlow ERP + Biometrics + Fee Automation",
-      image: "/images/campusflow.jpg",
+      image: "/work/laptop.svg",
       tag: "Products",
       metric: "100% Automated Reconciliation",
       icon: "Layers",
@@ -216,7 +265,7 @@ export default function App() {
       shortTitle: "HackCulture Engine",
       title: "A pan-India hackathon platform with automated team matching",
       channels: "HackCulture + 40+ Campuses",
-      image: "/images/hackculture.jpg",
+      image: "/work/events.svg",
       tag: "Campus",
       metric: "2,500+ Devs Active",
       icon: "Terminal",
@@ -239,7 +288,7 @@ export default function App() {
       shortTitle: "4K Studio & Podcasts",
       title: "In-house 4K studio production, podcasts and viral short-form IP",
       channels: "4K Studio + Creator Channels",
-      image: "/images/creator_studio.jpg",
+      image: "/work/perfume.svg",
       tag: "Creator",
       metric: "18M+ Organic Views",
       icon: "Video",
@@ -262,7 +311,7 @@ export default function App() {
       shortTitle: "White-Label Turnkey",
       title: "White-label software outsourcing with turnkey source code licensing",
       channels: "Turnkey SaaS + Source Code",
-      image: "/images/campusflow.jpg",
+      image: "/work/laptop.svg",
       tag: "Software",
       metric: "12 Partner Deployments",
       icon: "ShieldCheck",
@@ -285,7 +334,7 @@ export default function App() {
       shortTitle: "Campus Network",
       title: "A campus ambassador programme and experiential on-ground activations",
       channels: "Campus ambassadors + Colleges",
-      image: "/images/hackculture.jpg",
+      image: "/work/events.svg",
       tag: "Campus",
       metric: "35,000+ Students Reached",
       icon: "Globe",
@@ -307,7 +356,7 @@ export default function App() {
       shortTitle: "Custom Cloud Engine",
       title: "High-performance web applications and custom cloud architecture",
       channels: "Web + Cloud Architecture",
-      image: "/images/campusflow.jpg",
+      image: "/work/perfume.svg",
       tag: "Software",
       metric: "<80ms API Latency",
       icon: "Zap",
@@ -329,7 +378,7 @@ export default function App() {
       shortTitle: "Creator Dealmaking",
       title: "Creator profile management, rate negotiation and escrow brand deals",
       channels: "Creator Deals + Commercials",
-      image: "/images/creator_studio.jpg",
+      image: "/work/jewellery.svg",
       tag: "Creator",
       metric: "₹1.2 Cr Closed",
       icon: "Check",
@@ -351,7 +400,7 @@ export default function App() {
       shortTitle: "Proof-of-Work OS",
       title: "A verifiable developer proof-of-work ranking platform",
       channels: "Web Platform + Ranking Engine",
-      image: "/images/hackculture.jpg",
+      image: "/work/beauty.svg",
       tag: "Software",
       metric: "1,000 Pt DevRank",
       icon: "Clock",
@@ -504,7 +553,7 @@ export default function App() {
   return (
     <div className="surface-paper" style={{ minHeight: "100vh" }}>
       {/* HEADER NAVIGATION */}
-      <header className="nav" data-solid={navSolid}>
+      <header className="nav" data-solid={navSolid} data-hidden={navHidden}>
         <div className="wrap nav-inner">
           <a className="logo" href="#top" aria-label="Divak Home">
             <svg className="logo-symbol" viewBox="0 0 64 64" aria-hidden="true">
@@ -552,8 +601,8 @@ export default function App() {
           <div className="nav-actions">
             <button
               className="btn btn-ghost btn-sm"
-              onClick={() => setCalendlyModalOpen(true)}
-              title="Schedule consultation (Weekdays 9-11 PM, All Days 9-12 AM/PM)"
+              onClick={openCalendly}
+              title="Schedule consultation on Calendly (Weekdays 9-11 PM, All Days 9-12 AM/PM)"
             >
               <Calendar className="btn-icon" size={16} />
               <span>Schedule Call</span>
@@ -617,7 +666,7 @@ export default function App() {
               className="btn btn-ghost"
               onClick={() => {
                 setMobileMenuOpen(false);
-                setCalendlyModalOpen(true);
+                openCalendly();
               }}
             >
               <Calendar size={18} /> Book Call (9-11 PM / 9-12)
@@ -669,7 +718,7 @@ export default function App() {
                   </a>
                   <button
                     className="btn btn-ghost"
-                    onClick={() => setCalendlyModalOpen(true)}
+                    onClick={openCalendly}
                   >
                     <Clock size={18} />
                     <span>Book Call (Weekdays 9-11 PM / All Days 9-12)</span>
@@ -842,13 +891,9 @@ export default function App() {
         <section id="products" className="surface-ink band" aria-labelledby="products-title">
           <div className="wrap">
             <div className="section-head">
-              <div className="badge-tag">
-                <span className="badge-dot"></span>
-                Flagship Products Ecosystem
-              </div>
               <h2 id="products-title">Our Products</h2>
               <p>
-                Proven, production-deployed software products you can license, white-label, or customize for your enterprise.
+                Proven, production-deployed software products and creative setups engineered for scale.
               </p>
             </div>
 
@@ -864,7 +909,7 @@ export default function App() {
                 >
                   <div className="work-media">
                     <img
-                      src="/images/campusflow.jpg"
+                      src="/work/campusflow.svg"
                       alt="CampusFlow School Management ERP"
                       loading="lazy"
                     />
@@ -915,7 +960,7 @@ export default function App() {
                 >
                   <div className="work-media">
                     <img
-                      src="/images/hackculture.jpg"
+                      src="/work/hackculture.svg"
                       alt="HackCulture Collegiate Hackathon Platform"
                       loading="lazy"
                     />
@@ -967,7 +1012,7 @@ export default function App() {
                 >
                   <div className="work-media">
                     <img
-                      src="/images/creator_studio.jpg"
+                      src="/work/creator_studio.svg"
                       alt="In-House 4K Studio &amp; Creator Production"
                       loading="lazy"
                     />
@@ -998,7 +1043,7 @@ export default function App() {
                         className="btn btn-sm"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setCalendlyModalOpen(true);
+                          openCalendly();
                         }}
                       >
                         Book Studio Call
@@ -1022,7 +1067,7 @@ export default function App() {
               <div style={{ marginTop: "1.5rem" }}>
                 <button
                   className="btn btn-ink"
-                  onClick={() => setCalendlyModalOpen(true)}
+                  onClick={openCalendly}
                 >
                   <Calendar size={18} /> Schedule Technical Consultation
                 </button>
@@ -1266,7 +1311,7 @@ export default function App() {
                 </div>
                 <button
                   className="btn btn-ink"
-                  onClick={() => setCalendlyModalOpen(true)}
+                  onClick={openCalendly}
                 >
                   Book Alignment Call
                 </button>
@@ -1332,7 +1377,7 @@ export default function App() {
               <div style={{ marginTop: "1rem" }}>
                 <button
                   className="btn btn-ghost"
-                  onClick={() => setCalendlyModalOpen(true)}
+                  onClick={openCalendly}
                 >
                   <Calendar size={18} /> Meet the Founders
                 </button>
@@ -1343,7 +1388,7 @@ export default function App() {
               <article className="founder">
                 <div className="founder-photo">
                   <img
-                    src="/images/creator_studio.jpg"
+                    src="/team/divyansh.webp"
                     alt="Divyansh - Co-Founder &amp; Technical Architect"
                     loading="lazy"
                   />
@@ -1360,7 +1405,7 @@ export default function App() {
               <article className="founder">
                 <div className="founder-photo">
                   <img
-                    src="/images/hackculture.jpg"
+                    src="/team/akshat.webp"
                     alt="Akshat - Co-Founder &amp; Creative Director"
                     loading="lazy"
                   />
@@ -1438,7 +1483,7 @@ export default function App() {
               <div style={{ marginTop: "1.5rem" }}>
                 <button
                   className="btn btn-ink"
-                  onClick={() => setCalendlyModalOpen(true)}
+                  onClick={openCalendly}
                 >
                   <Calendar size={18} /> Schedule 30-Min Calendly Call
                 </button>
@@ -1623,7 +1668,7 @@ export default function App() {
                   </p>
                   <button
                     className="btn btn-ghost"
-                    onClick={() => setCalendlyModalOpen(true)}
+                    onClick={openCalendly}
                   >
                     Lock Your Slot on Calendly Directly <ArrowUpRight size={16} />
                   </button>
@@ -1855,7 +1900,7 @@ export default function App() {
                       className="btn btn-ghost"
                       onClick={() => {
                         setActiveCaseModal(null);
-                        setCalendlyModalOpen(true);
+                        openCalendly();
                       }}
                     >
                       <Calendar size={16} /> Discuss Technical Deployment
@@ -1874,174 +1919,6 @@ export default function App() {
                     </a>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* CALENDLY SCHEDULING MODAL WITH USER SPECIFIED AVAILABILITY */}
-      {calendlyModalOpen && (
-        <div className="modal-backdrop" onClick={() => setCalendlyModalOpen(false)}>
-          <div className="calendly-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                <span className="badge-tag">
-                  Calendly Integration
-                </span>
-                <span style={{ fontSize: "var(--t-xs)", color: "var(--on-ink-muted)" }}>
-                  Verified Availability
-                </span>
-              </div>
-              <button
-                className="modal-close-btn"
-                onClick={() => setCalendlyModalOpen(false)}
-              >
-                <X size={16} /> Close
-              </button>
-            </div>
-
-            <div className="calendly-grid">
-              <div className="calendly-info">
-                <div>
-                  <div className="badge-tag" style={{ background: "rgba(255, 161, 46, 0.2)", color: "var(--accent)" }}>
-                    30-Min Technical &amp; Strategy Sync
-                  </div>
-                  <h3 style={{ fontSize: "var(--t-xl)", marginTop: "1rem" }}>
-                    Book a Call with Divak Founders
-                  </h3>
-                  <p style={{ fontSize: "var(--t-sm)", color: "var(--on-ink-muted)", marginTop: "0.75rem", lineHeight: 1.5 }}>
-                    Discuss tailor-made software architecture, CampusFlow School ERP licensing, creator representation, or HackCulture collegiate hackathons.
-                  </p>
-
-                  <div style={{ marginTop: "1.5rem", display: "grid", gap: "0.75rem" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "var(--t-sm)" }}>
-                      <Clock size={16} style={{ color: "var(--accent)" }} />
-                      <span>30 Minutes &bull; Google Meet video link</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "var(--t-sm)" }}>
-                      <Globe size={16} style={{ color: "var(--secondary)" }} />
-                      <span>India Standard Time (IST)</span>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", fontSize: "var(--t-sm)" }}>
-                      <ShieldCheck size={16} style={{ color: "var(--accent)" }} />
-                      <span>Direct technical review with founders</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ borderTop: "1px solid var(--line-ink)", paddingTop: "1rem" }}>
-                  <div style={{ fontSize: "var(--t-xs)", color: "var(--accent)", fontWeight: 700, marginBottom: "0.25rem" }}>
-                    OFFICIAL AVAILABILITY WINDOWS:
-                  </div>
-                  <div style={{ fontSize: "var(--t-sm)", color: "var(--on-ink)" }}>
-                    &bull; <strong>Weekdays:</strong> 9:00 PM – 11:00 PM IST<br />
-                    &bull; <strong>All Days / Weekends:</strong> 9:00 AM – 12:00 PM IST
-                  </div>
-                </div>
-              </div>
-
-              <div className="calendly-schedule-box">
-                {!bookingConfirmed ? (
-                  <form onSubmit={handleBookingSubmit} style={{ display: "grid", gap: "1rem" }}>
-                    <div>
-                      <label style={{ fontSize: "var(--t-xs)", fontWeight: 600, color: "var(--on-ink-muted)" }}>
-                        1. Select Preferred Time Window
-                      </label>
-                      <div style={{ display: "grid", gap: "0.5rem", marginTop: "0.5rem" }}>
-                        {[
-                          { id: "wd-1", label: "Weekday Evening: 9:00 PM – 9:30 PM IST" },
-                          { id: "wd-2", label: "Weekday Evening: 9:30 PM – 10:00 PM IST" },
-                          { id: "wd-3", label: "Weekday Night: 10:00 PM – 10:30 PM IST" },
-                          { id: "wd-4", label: "Weekday Night: 10:30 PM – 11:00 PM IST" },
-                          { id: "ad-1", label: "Morning Strategy: 9:00 AM – 9:30 AM IST" },
-                          { id: "ad-2", label: "Morning Strategy: 9:30 AM – 10:00 AM IST" },
-                          { id: "ad-3", label: "Midday Deep-Dive: 10:30 AM – 11:00 AM IST" },
-                          { id: "ad-4", label: "Midday Deep-Dive: 11:30 AM – 12:00 PM IST" }
-                        ].map((slot) => (
-                          <div
-                            key={slot.id}
-                            className="time-slot-pill"
-                            data-selected={selectedSlot === slot.id}
-                            onClick={() => setSelectedSlot(slot.id)}
-                          >
-                            {slot.label}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="field">
-                      <label style={{ fontSize: "var(--t-xs)", fontWeight: 600, color: "var(--on-ink-muted)" }}>
-                        2. Your Name &amp; Email
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Your Full Name"
-                        style={{ marginBottom: "0.5rem" }}
-                      />
-                      <input
-                        type="email"
-                        required
-                        placeholder="Work Email Address"
-                      />
-                    </div>
-
-                    <div className="field">
-                      <label style={{ fontSize: "var(--t-xs)", fontWeight: 600, color: "var(--on-ink-muted)" }}>
-                        3. Topic of Discussion
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="e.g. CampusFlow ERP licensing or Custom Software"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="btn"
-                      style={{ justifyContent: "center", marginTop: "0.5rem" }}
-                      disabled={!selectedSlot}
-                    >
-                      <Check size={18} />
-                      <span>Confirm &amp; Generate Calendar Invite</span>
-                    </button>
-                  </form>
-                ) : (
-                  <div style={{ textAlign: "center", padding: "2rem 1rem" }}>
-                    <div
-                      style={{
-                        width: "3.5rem",
-                        height: "3.5rem",
-                        borderRadius: "50%",
-                        background: "var(--accent)",
-                        color: "var(--on-accent)",
-                        display: "grid",
-                        placeItems: "center",
-                        margin: "0 auto 1.5rem"
-                      }}
-                    >
-                      <Check size={28} />
-                    </div>
-                    <h3>Meeting Scheduled!</h3>
-                    <p style={{ fontSize: "var(--t-sm)", color: "var(--on-ink-muted)", marginTop: "0.75rem" }}>
-                      We have reserved your slot. A calendar invitation with Google Meet details has been queued. You will receive a direct reminder beforehand.
-                    </p>
-                    <div style={{ marginTop: "1.5rem" }}>
-                      <button
-                        className="btn btn-ghost"
-                        onClick={() => {
-                          setBookingConfirmed(false);
-                          setCalendlyModalOpen(false);
-                        }}
-                      >
-                        Back to Website
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>

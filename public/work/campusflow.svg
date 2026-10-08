@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900">
+  <rect width="1200" height="900" fill="#1e2814"/>
+  <circle cx="980" cy="180" r="240" fill="#5b6b2a" opacity="0.6"/>
+  <circle cx="150" cy="750" r="180" fill="#ffa12e" opacity="0.4"/>
+  
+  <!-- Main ERP Screen Frame -->
+  <rect x="200" y="140" width="800" height="520" rx="28" fill="#12170b" stroke="#333f1f" stroke-width="3"/>
+  
+  <!-- Sidebar -->
+  <rect x="200" y="140" width="180" height="520" rx="28" fill="#1a2210"/>
+  <rect x="230" y="180" width="120" height="24" rx="6" fill="#ffa12e"/>
+  <rect x="230" y="240" width="100" height="14" rx="4" fill="#a3b55e"/>
+  <rect x="230" y="275" width="120" height="14" rx="4" fill="#5b6b2a" opacity="0.7"/>
+  <rect x="230" y="310" width="90" height="14" rx="4" fill="#5b6b2a" opacity="0.7"/>
+  <rect x="230" y="345" width="110" height="14" rx="4" fill="#5b6b2a" opacity="0.7"/>
+  <rect x="230" y="380" width="95" height="14" rx="4" fill="#5b6b2a" opacity="0.7"/>
+  
+  <!-- Top Navigation Bar -->
+  <rect x="380" y="140" width="620" height="60" fill="#161e0e"/>
+  <rect x="420" y="160" width="220" height="20" rx="6" fill="#2d381c"/>
+  <circle cx="920" cy="170" r="16" fill="#ffa12e"/>
+  <circle cx="955" cy="170" r="16" fill="#a3b55e"/>
+  
+  <!-- KPI Metric Cards -->
+  <rect x="420" y="230" width="160" height="100" rx="14" fill="#212a14" stroke="#3a4821" stroke-width="2"/>
+  <rect x="440" y="250" width="60" height="10" rx="5" fill="#a3b55e"/>
+  <rect x="440" y="275" width="100" height="22" rx="6" fill="#f3f4ea"/>
+  <rect x="440" y="307" width="80" height="8" rx="4" fill="#ffa12e"/>
+  
+  <rect x="610" y="230" width="160" height="100" rx="14" fill="#212a14" stroke="#3a4821" stroke-width="2"/>
+  <rect x="630" y="250" width="70" height="10" rx="5" fill="#a3b55e"/>
+  <rect x="630" y="275" width="90" height="22" rx="6" fill="#f3f4ea"/>
+  <rect x="630" y="307" width="85" height="8" rx="4" fill="#52b788"/>
+  
+  <rect x="800" y="230" width="160" height="100" rx="14" fill="#212a14" stroke="#3a4821" stroke-width="2"/>
+  <rect x="820" y="250" width="80" height="10" rx="5" fill="#a3b55e"/>
+  <rect x="820" y="275" width="110" height="22" rx="6" fill="#ffa12e"/>
+  <rect x="820" y="307" width="75" height="8" rx="4" fill="#a3b55e"/>
+  
+  <!-- Data Table / Live Attendance Grid -->
+  <rect x="420" y="360" width="540" height="260" rx="16" fill="#1b2311"/>
+  <rect x="445" y="385" width="490" height="20" rx="6" fill="#2c371b"/>
+  
+  <!-- Rows with Checkmarks -->
+  <rect x="445" y="425" width="220" height="16" rx="4" fill="#a3b55e" opacity="0.6"/>
+  <rect x="740" y="420" width="70" height="26" rx="13" fill="#2d6a4f"/>
+  <circle cx="880" cy="433" r="10" fill="#ffa12e"/>
+  
+  <rect x="445" y="470" width="250" height="16" rx="4" fill="#a3b55e" opacity="0.6"/>
+  <rect x="740" y="465" width="70" height="26" rx="13" fill="#2d6a4f"/>
+  <circle cx="880" cy="478" r="10" fill="#52b788"/>
+  
+  <rect x="445" y="515" width="190" height="16" rx="4" fill="#a3b55e" opacity="0.6"/>
+  <rect x="740" y="510" width="70" height="26" rx="13" fill="#2d6a4f"/>
+  <circle cx="880" cy="523" r="10" fill="#52b788"/>
+  
+  <rect x="445" y="560" width="230" height="16" rx="4" fill="#a3b55e" opacity="0.6"/>
+  <rect x="740" y="555" width="70" height="26" rx="13" fill="#ffa12e"/>
+  <circle cx="880" cy="568" r="10" fill="#ffa12e"/>
+  
+  <!-- Razorpay / Live Payment Floating Card -->
+  <g transform="translate(140, 480)">
+    <rect width="200" height="120" rx="18" fill="#ffa12e" filter="drop-shadow(0 15px 30px rgba(0,0,0,0.5))"/>
+    <text x="20" y="40" font-family="system-ui, sans-serif" font-weight="800" font-size="18" fill="#1e2814">Razorpay Fee Sync</text>
+    <text x="20" y="70" font-family="system-ui, sans-serif" font-weight="700" font-size="24" fill="#1e2814">₹ 14.8L</text>
+    <rect x="20" y="86" width="90" height="16" rx="8" fill="#1e2814"/>
+    <text x="32" y="98" font-family="system-ui, sans-serif" font-weight="700" font-size="10" fill="#f3f4ea">INSTANT SETTLE</text>
+  </g>
+  
+  <!-- Base bar -->
+  <rect y="780" width="1200" height="120" fill="#141a0d"/>
+  <rect x="480" y="820" width="240" height="12" rx="6" fill="#333f1f"/>
+</svg>
