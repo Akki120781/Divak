@@ -490,31 +490,47 @@ export default function App() {
     }
   ];
 
-  // Process Steps Data
+  // Process Steps Data (Multi-Color Palette per user request)
   const processSteps = [
     {
       num: "01",
+      tag: "Discovery",
       title: "Listen & Technical Audit",
       desc: "We dissect your operational bottlenecks, product specs, or target creator demographic. We align on measurable success criteria in clear, no-nonsense language.",
-      chips: ["Architecture Review", "Operational Scoping", "Audience Blueprint"]
+      chips: ["Architecture Review", "Operational Scoping", "Audience Blueprint"],
+      color: "#C6A75E", // Soft Gold / Warm Amber (from swatch)
+      lightBg: "rgba(198, 167, 94, 0.18)",
+      glow: "rgba(198, 167, 94, 0.4)"
     },
     {
       num: "02",
+      tag: "Architecture",
       title: "Shape Architecture & Strategy",
       desc: "We build database schemas, interface wireframes, or video production storyboards before writing a line of code or setting up lighting. You see the entire plan mapped out.",
-      chips: ["System Schema Design", "UI/UX Prototypes", "Production Scripts"]
+      chips: ["System Schema Design", "UI/UX Prototypes", "Production Scripts"],
+      color: "#0284C7", // Electric Azure / Tech Blue
+      lightBg: "rgba(2, 132, 199, 0.18)",
+      glow: "rgba(2, 132, 199, 0.4)"
     },
     {
       num: "03",
+      tag: "Sprint Execution",
       title: "Make, Code & Produce",
       desc: "Engineers and video producers work in synchronized weekly sprints. You test live staging builds or review video cuts every week—zero big reveals at the 11th hour.",
-      chips: ["Agile Code Sprints", "4K Studio Shoots", "CI/CD Staging Builds"]
+      chips: ["Agile Code Sprints", "4K Studio Shoots", "CI/CD Staging Builds"],
+      color: "#EA580C", // Vibrant Sunset Coral / Burnt Orange
+      lightBg: "rgba(234, 88, 12, 0.18)",
+      glow: "rgba(234, 88, 12, 0.4)"
     },
     {
       num: "04",
+      tag: "Launch & Scale",
       title: "Launch, Scale & Support",
       desc: "We deploy to production cloud infrastructures, configure Razorpay payments, launch content distribution, and monitor performance daily. You receive clean monthly executive reports.",
-      chips: ["Production Rollout", "Razorpay Reconciliation", "SLA Engineering"]
+      chips: ["Production Rollout", "Razorpay Reconciliation", "SLA Engineering"],
+      color: "#10B981", // Emerald Mint / Production Green (restores energetic green vibe)
+      lightBg: "rgba(16, 185, 129, 0.18)",
+      glow: "rgba(16, 185, 129, 0.4)"
     }
   ];
 
@@ -671,12 +687,15 @@ export default function App() {
       )}
 
       <main id="main">
-        {/* HERO SECTION - CLEAN CENTERED AESTHETIC */}
+        {/* HERO SECTION - CLEAN CENTERED AESTHETIC ON WARM LIGHT CLAY CANVAS */}
         <section
           id="top"
-          className="hero surface-ink"
+          className="hero surface-clay"
           aria-labelledby="hero-title"
         >
+          <div className="hero-art-bg" aria-hidden="true">
+            <img src="/images/hero_texture.jpg" alt="" />
+          </div>
           <div className="wrap">
             <div className="hero-centered">
               <h1 id="hero-title">
@@ -996,11 +1015,19 @@ export default function App() {
 
               {/* PROCESS METER */}
               <div className="process-meter" aria-hidden="true">
-                <span style={{ transform: `scaleX(${(activeStep + 1) / processSteps.length})` }}></span>
+                <span
+                  style={{
+                    transform: `scaleX(${(activeStep + 1) / processSteps.length})`,
+                    background: processSteps[activeStep].color
+                  }}
+                ></span>
               </div>
 
               <div className="process-now" aria-hidden="true">
-                <span className="process-now-num">
+                <span
+                  className="process-now-num"
+                  style={{ color: processSteps[activeStep].color }}
+                >
                   <span key={activeStep} className="process-num-anim">
                     {processSteps[activeStep].num}
                   </span>
@@ -1012,28 +1039,72 @@ export default function App() {
 
             {/* STEPS LIST */}
             <ol ref={stepsContainerRef} className="steps">
-              {processSteps.map((step, idx) => (
-                <li
-                  key={idx}
-                  className="step"
-                  data-step={idx}
-                  data-active={activeStep === idx}
-                  onClick={() => handleStepClick(idx)}
-                >
-                  <div className="step-top">
-                    <span className="step-num">{step.num}</span>
-                  </div>
-                  <h3>{step.title}</h3>
-                  <p>{step.desc}</p>
-                  <ul className="chips">
-                    {step.chips.map((chip, cIdx) => (
-                      <li key={cIdx} className="chip">
-                        {chip}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
+              {processSteps.map((step, idx) => {
+                const isActive = activeStep === idx;
+                return (
+                  <li
+                    key={idx}
+                    className="step"
+                    data-step={idx}
+                    data-active={isActive}
+                    style={{
+                      borderLeft: isActive ? `5px solid #FFFFFF` : `4px solid ${step.color}`,
+                      ...(isActive
+                        ? {
+                            background: `linear-gradient(135deg, ${step.color} 0%, color-mix(in srgb, ${step.color} 70%, black) 100%)`,
+                            boxShadow: `0 20px 48px -12px ${step.glow || "rgba(0,0,0,0.5)"}`
+                          }
+                        : {})
+                    }}
+                    onClick={() => handleStepClick(idx)}
+                  >
+                    <div className="step-top">
+                      <span
+                        className="step-num"
+                        style={{ color: isActive ? "#FFFFFF" : step.color }}
+                      >
+                        {step.num}
+                      </span>
+                      <span
+                        className="step-badge"
+                        style={{
+                          background: isActive ? "rgba(255, 255, 255, 0.25)" : step.lightBg,
+                          color: isActive ? "#FFFFFF" : step.color,
+                          padding: "0.28rem 0.85rem",
+                          borderRadius: "999px",
+                          fontSize: "0.75rem",
+                          fontWeight: "700",
+                          letterSpacing: "0.06em",
+                          textTransform: "uppercase"
+                        }}
+                      >
+                        {step.tag}
+                      </span>
+                    </div>
+                    <h3 style={{ color: isActive ? "#FFFFFF" : "var(--on-ink)" }}>{step.title}</h3>
+                    <p style={{ color: isActive ? "rgba(255, 255, 255, 0.94)" : "var(--on-ink-muted)" }}>
+                      {step.desc}
+                    </p>
+                    <ul className="chips">
+                      {step.chips.map((chip, cIdx) => (
+                        <li
+                          key={cIdx}
+                          className="chip"
+                          style={{
+                            background: isActive
+                              ? "rgba(255, 255, 255, 0.22)"
+                              : "color-mix(in srgb, var(--on-ink) 8%, transparent)",
+                            color: isActive ? "#FFFFFF" : "var(--on-ink)",
+                            border: isActive ? "1px solid rgba(255, 255, 255, 0.28)" : "1px solid var(--line-ink)"
+                          }}
+                        >
+                          {chip}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                );
+              })}
             </ol>
           </div>
         </section>

@@ -5,8 +5,11 @@
   --primary-glow: #E6671A;
   --paper: #FFFCF4;
   --paper-2: #FBF9F5;
-  --clay: #E5D8CF;
-  --clay-border: #D4C5B9;
+  --clay: #E8DCC8;
+  --clay-2: #F2E9DC;
+  --clay-border: #D8C9B3;
+  --navy: #1F2A44;
+  --soft-gold: #C6A75E;
   --accent: #CC5500;
   --accent-deep: #B34700;
   --accent-glow: #E6671A;
@@ -132,6 +135,11 @@ img, svg, canvas {
 .surface-paper {
   background: var(--paper);
   color: var(--on-paper);
+}
+
+.surface-clay {
+  background: var(--clay);
+  color: var(--navy);
 }
 
 .surface-accent {
@@ -265,7 +273,7 @@ img, svg, canvas {
 .nav {
   z-index: 50;
   transition: transform .5s var(--ease-out), background .3s, backdrop-filter .3s;
-  color: var(--on-ink);
+  color: var(--navy);
   padding-block: 1rem;
   position: fixed;
   inset: 0 0 auto;
@@ -276,10 +284,11 @@ img, svg, canvas {
 }
 
 .nav[data-solid=true] {
-  background: color-mix(in srgb, var(--ink) 82%, transparent);
+  background: rgba(255, 252, 244, 0.92);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   backdrop-filter: blur(16px) saturate(1.4);
-  border-bottom: 1px solid var(--line-ink);
+  border-bottom: 1px solid var(--line-paper);
+  box-shadow: 0 4px 20px rgba(31, 42, 68, 0.05);
 }
 
 .nav-inner {
@@ -298,6 +307,7 @@ img, svg, canvas {
   font-weight: 700;
   text-decoration: none;
   display: inline-flex;
+  color: var(--navy);
 }
 
 .logo-symbol {
@@ -307,8 +317,8 @@ img, svg, canvas {
 }
 
 .nav-links {
-  background: color-mix(in srgb, var(--on-ink) 6%, transparent);
-  box-shadow: inset 0 0 0 1px var(--line-ink);
+  background: rgba(31, 42, 68, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(31, 42, 68, 0.12);
   border-radius: 999px;
   align-items: center;
   gap: .25rem;
@@ -320,7 +330,7 @@ img, svg, canvas {
 
 .nav-links a {
   font-size: var(--t-sm);
-  color: var(--on-ink-muted);
+  color: #4A463F;
   border-radius: 999px;
   padding: .5rem 1rem;
   font-weight: 500;
@@ -331,8 +341,8 @@ img, svg, canvas {
 
 .nav-links a:hover,
 .nav-links a[aria-current=true] {
-  color: var(--on-ink);
-  background: color-mix(in srgb, var(--on-ink) 12%, transparent);
+  color: var(--navy);
+  background: rgba(31, 42, 68, 0.08);
 }
 
 .nav-actions {
@@ -341,8 +351,21 @@ img, svg, canvas {
   gap: 0.75rem;
 }
 
+.nav-actions .btn-ghost {
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--navy);
+  box-shadow: inset 0 0 0 1.5px rgba(31, 42, 68, 0.2);
+  backdrop-filter: blur(8px);
+}
+
+.nav-actions .btn-ghost:hover {
+  background: #FFFFFF;
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
 .nav-toggle {
-  background: color-mix(in srgb, var(--on-ink) 10%, transparent);
+  background: rgba(31, 42, 68, 0.08);
   cursor: pointer;
   border: 0;
   border-radius: 999px;
@@ -425,6 +448,29 @@ img, svg, canvas {
   justify-content: space-between;
   flex: 1;
   width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-art-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.hero-art-bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.22;
+  mix-blend-mode: multiply;
+  filter: contrast(1.16) saturate(1.22);
+  transform: scale(1.02);
+  mask-image: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.78) 62%, rgba(0, 0, 0, 1) 100%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.78) 62%, rgba(0, 0, 0, 1) 100%);
 }
 
 .hero::before {
@@ -435,6 +481,18 @@ img, svg, canvas {
   height: 75vw;
   position: absolute;
   inset: -20% -10% auto auto;
+}
+
+.hero.surface-clay::before {
+  content: "";
+  background: radial-gradient(circle at 50% 35%, rgba(255, 252, 244, 0.85) 0%, rgba(232, 220, 200, 0.45) 55%, transparent 80%);
+  pointer-events: none;
+  width: 85vw;
+  height: 85vw;
+  position: absolute;
+  inset: -20% auto auto 50%;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 
 .hero-centered {
@@ -462,6 +520,7 @@ img, svg, canvas {
   text-align: center;
   text-wrap: balance;
   width: 100%;
+  color: var(--navy);
 }
 
 .hero-line {
@@ -485,8 +544,9 @@ img, svg, canvas {
   margin: 1.75rem auto 0;
   text-align: center;
   font-size: var(--t-md);
-  color: var(--on-ink-muted);
+  color: #403C35;
   line-height: 1.55;
+  font-weight: 450;
 }
 
 .hero-centered .hero-actions {
@@ -497,10 +557,23 @@ img, svg, canvas {
   flex-wrap: wrap;
 }
 
+.hero.surface-clay .btn-ghost {
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--navy);
+  box-shadow: inset 0 0 0 1.5px rgba(31, 42, 68, 0.18);
+  backdrop-filter: blur(8px);
+}
+
+.hero.surface-clay .btn-ghost:hover {
+  background: #FFFFFF;
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
 .hero-foot {
-  border-top: 1px solid var(--line-ink);
+  border-top: 1px solid rgba(31, 42, 68, 0.14);
   font-size: var(--t-sm);
-  color: var(--on-ink-muted);
+  color: #4F4942;
   justify-content: space-between;
   align-items: end;
   gap: 2rem;
@@ -508,10 +581,11 @@ img, svg, canvas {
   padding-top: 1rem;
   display: flex;
   position: relative;
+  z-index: 2;
 }
 
 .hero-foot strong {
-  color: var(--on-ink);
+  color: var(--navy);
   font-weight: 600;
 }
 
@@ -519,13 +593,15 @@ img, svg, canvas {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(198, 167, 94, 0.48);
   padding: 0.4rem 0.9rem;
   border-radius: 999px;
-  color: var(--on-ink);
+  color: var(--navy);
   font-size: var(--t-xs);
   font-weight: 600;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(31, 42, 68, 0.05);
 }
 
 /* MARQUEE */
@@ -1337,8 +1413,8 @@ img, svg, canvas {
 }
 
 .step[data-active=true] {
-  background: var(--primary);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
 }
 
 .step-top {
@@ -1352,13 +1428,12 @@ img, svg, canvas {
 .step-num {
   font-family: var(--display);
   font-size: var(--t-2xl);
-  color: var(--secondary);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1;
 }
 
 .step[data-active=true] .step-num {
-  color: var(--accent);
+  color: #FFFFFF;
 }
 
 .step h3 {
