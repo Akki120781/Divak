@@ -1,24 +1,26 @@
 :root {
-  --ink: #101010;
-  --ink-2: #191919;
-  --primary: #D5360C;
-  --primary-glow: #F2572C;
-  --paper: #E6D5BD;
-  --paper-2: #DAC6AB;
-  --accent: #D5360C;
-  --accent-deep: #B52B06;
-  --accent-glow: #FA6438;
-  --secondary: #D48B47;
-  --tertiary: #E89A3C;
-  --glass: #1c1c1c;
-  --on-ink: #E6D5BD;
-  --on-ink-muted: #B8A892;
-  --on-paper: #101010;
-  --on-paper-muted: #574F44;
+  --ink: #1E1E1E;
+  --ink-2: #2B2B2B;
+  --primary: #CC5500;
+  --primary-glow: #E6671A;
+  --paper: #FFFCF4;
+  --paper-2: #FBF9F5;
+  --clay: #E5D8CF;
+  --clay-border: #D4C5B9;
+  --accent: #CC5500;
+  --accent-deep: #B34700;
+  --accent-glow: #E6671A;
+  --secondary: #C85A32;
+  --tertiary: #D48B47;
+  --glass: #2B2B2B;
+  --on-ink: #FFFCF4;
+  --on-ink-muted: #C5BEB5;
+  --on-paper: #1E1E1E;
+  --on-paper-muted: #5C5852;
   --on-primary: #FFFFFF;
   --on-accent: #FFFFFF;
-  --line-ink: color-mix(in srgb, var(--on-ink) 14%, transparent);
-  --line-paper: color-mix(in srgb, var(--on-paper) 14%, transparent);
+  --line-ink: rgba(255, 252, 244, 0.12);
+  --line-paper: rgba(30, 30, 30, 0.10);
   --display: "Bricolage Grotesque", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --body: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --t-xs: .8125rem;
@@ -207,7 +209,7 @@ img, svg, canvas {
 .btn::before {
   content: "";
   z-index: -1;
-  background: var(--paper);
+  background: var(--accent-deep);
   border-radius: inherit;
   transition: transform .45s var(--ease-out);
   position: absolute;
@@ -813,7 +815,8 @@ img, svg, canvas {
 }
 
 .cap-glyph {
-  background: var(--paper-2);
+  background: var(--clay);
+  border: 1px solid var(--clay-border);
   width: 3rem;
   height: 3rem;
   color: var(--primary);
@@ -917,9 +920,9 @@ img, svg, canvas {
 }
 
 .surface-paper .chip {
-  background: var(--paper-2);
+  background: var(--clay);
   color: var(--on-paper);
-  border: 1px solid var(--line-paper);
+  border: 1px solid var(--clay-border);
 }
 
 .cap-more {
@@ -1426,13 +1429,16 @@ img, svg, canvas {
 }
 
 .promise-a {
-  background: var(--secondary);
+  background: var(--clay);
+  border: 1px solid var(--clay-border);
   color: var(--on-paper);
   grid-column: span 5;
 }
 
 .promise-b {
-  background: var(--paper-2);
+  background: var(--clay);
+  border: 1px solid var(--clay-border);
+  color: var(--on-paper);
   grid-column: span 5;
 }
 
