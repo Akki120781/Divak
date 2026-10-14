@@ -18,6 +18,8 @@ import {
 
 const currentYear = new Date().getFullYear();
 const CALENDLY_URL = "https://calendly.com/goyaldivyansh2004";
+// Founder section toggle: currently hidden per user request; set to true to re-enable after the event
+const SHOW_FOUNDERS = false;
 const wordmarkLetters = ["D", "I", "V", "A", "K"];
 const manifestoWords =
   "Most software agencies write code that gathers dust. Most creative agencies make noise that gets scrolled past. We build the high-conviction intersection: production-grade systems engineered for operational scale, coupled with creator-led activations and hackathon cultures that command real audience attention.".split(
@@ -240,7 +242,7 @@ export default function App() {
       tag: "Products",
       metric: "100% Automated Reconciliation",
       icon: "Layers",
-      liveUrl: "https://campusflow.smrpublicschool.in/",
+      liveUrl: null,
       overview:
         "A production-grade, multi-tier school management ERP system actively piloted in a live school environment. Replaces physical registers and fragmented apps with a unified, role-based operating system.",
       highlights: [
@@ -263,7 +265,7 @@ export default function App() {
       tag: "Campus",
       metric: "2,500+ Devs Active",
       icon: "Terminal",
-      liveUrl: "https://devnovate.co/",
+      liveUrl: null,
       overview:
         "Our all-in-one platform for hosting and scaling hackathons across universities and tech hubs. Streamlines registration, algorithmic team matching, and multi-criteria radar scoring.",
       highlights: [
@@ -309,7 +311,7 @@ export default function App() {
       tag: "Software",
       metric: "12 Partner Deployments",
       icon: "ShieldCheck",
-      liveUrl: "https://campusflow.smrpublicschool.in/",
+      liveUrl: null,
       overview:
         "Institutional clients and partner agencies license our battle-tested architectures under their own brand. Complete with multi-tenant isolation, custom domains, and branded mobile apps.",
       highlights: [
@@ -572,9 +574,6 @@ export default function App() {
           <nav aria-label="Main Navigation">
             <ul className="nav-links">
               <li>
-                <a href="#products">Products &amp; ERP</a>
-              </li>
-              <li>
                 <a href="#tech">Tech Solutions</a>
               </li>
               <li>
@@ -624,33 +623,28 @@ export default function App() {
           <div>
             <ul>
               <li>
-                <a href="#products" onClick={() => setMobileMenuOpen(false)}>
-                  01 // Products &amp; CampusFlow ERP
-                </a>
-              </li>
-              <li>
                 <a href="#tech" onClick={() => setMobileMenuOpen(false)}>
-                  02 // What We Do &amp; Capabilities
+                  01 // Tech Solutions &amp; Engineering
                 </a>
               </li>
               <li>
                 <a href="#creator" onClick={() => setMobileMenuOpen(false)}>
-                  03 // Creator &amp; In-House Production
+                  02 // Creator Studio &amp; Production
                 </a>
               </li>
               <li>
                 <a href="#work" onClick={() => setMobileMenuOpen(false)}>
-                  04 // Selected Work
+                  03 // Selected Work &amp; Architecture
                 </a>
               </li>
               <li>
                 <a href="#process" onClick={() => setMobileMenuOpen(false)}>
-                  05 // How We Work
+                  04 // How We Work
                 </a>
               </li>
               <li>
                 <a href="#faq" onClick={() => setMobileMenuOpen(false)}>
-                  06 // FAQ
+                  05 // FAQ
                 </a>
               </li>
             </ul>
@@ -703,8 +697,8 @@ export default function App() {
                 nationwide collegiate hackathons.
               </p>
               <div className="hero-actions">
-                <a className="btn" href="#products">
-                  <span>Explore Products</span>
+                <a className="btn" href="#work">
+                  <span>Explore Work</span>
                   <ArrowUpRight className="btn-icon" size={18} />
                 </a>
                 <button
@@ -824,82 +818,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* FLAGSHIP PRODUCTS SECTION */}
-        <section id="products" className="surface-ink band" aria-labelledby="products-title">
-          <div className="wrap">
-            <div className="section-head">
-              <h2 id="products-title">Our Products</h2>
-              <p>
-                Proven, production-deployed software products and creative setups engineered for scale.
-              </p>
-            </div>
-
-            {/* PRODUCTS: DISPLAYED USING ORIGINAL WEBSITE TEMPLATE */}
-            <div className="work-grid">
-              {workItems.slice(0, 3).map((item) => (
-                <article key={item.id} className="work-card">
-                  <div
-                    className="work-link"
-                    onClick={() => setActiveCaseModal(item)}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <div className="work-media">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        loading="lazy"
-                      />
-                      <span className="work-tag">{item.tag}</span>
-                      <span className="work-open" aria-hidden="true">
-                        Read the case <ArrowUpRight className="work-open-icon" size={16} />
-                      </span>
-                    </div>
-                    <div className="work-meta">
-                      <div>
-                        <p className="work-client">{item.client}</p>
-                        <h3>{item.title}</h3>
-                      </div>
-                      <p className="work-channels">{item.channels}</p>
-                    </div>
-                    <div className="work-card-actions">
-                      <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveCaseModal(item);
-                        }}
-                      >
-                        Architecture <ArrowUpRight size={14} />
-                      </button>
-                      {item.liveUrl ? (
-                        <a
-                          className="btn btn-sm"
-                          href={item.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          Launch Demo <ExternalLink size={14} />
-                        </a>
-                      ) : (
-                        <button
-                          className="btn btn-sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openCalendly();
-                          }}
-                        >
-                          Book Studio Call <ArrowUpRight size={14} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* WHAT WE DO & SERVICES ACCORDION */}
         <section id="tech" className="surface-paper band" aria-labelledby="services-title">
@@ -990,15 +908,15 @@ export default function App() {
               </h2>
               <div className="work-head-side">
                 <p>
-                  Selected work for brands and institutions across India. Client names are kept confidential; open any project to see the brief and what we did.
+                  Selected work for brands and institutions across India. Real client work. The client’s name is kept confidential. Open any project to inspect the technical architecture and delivery brief.
                 </p>
                 <div className="filters" role="group" aria-label="Filter work by type">
                   {[
                     { id: "all", label: "All" },
-                    { id: "campus", label: "Campus" },
+                    { id: "products", label: "Products & ERP" },
                     { id: "software", label: "Software" },
                     { id: "creator", label: "Creator" },
-                    { id: "products", label: "Products" }
+                    { id: "campus", label: "Campus" }
                   ].map((filter) => (
                     <button
                       key={filter.id}
@@ -1028,7 +946,7 @@ export default function App() {
                       <img src={item.image} alt={item.title} loading="lazy" />
                       <span className="work-tag">{item.tag}</span>
                       <span className="work-open" aria-hidden="true">
-                        Read the case <ArrowUpRight className="work-open-icon" size={16} />
+                        Architecture Brief <ArrowUpRight className="work-open-icon" size={16} />
                       </span>
                     </div>
                     <div className="work-meta">
@@ -1037,6 +955,26 @@ export default function App() {
                         <h3>{item.title}</h3>
                       </div>
                       <p className="work-channels">{item.channels}</p>
+                    </div>
+                    <div className="work-card-actions">
+                      <button
+                        className="btn btn-sm btn-ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveCaseModal(item);
+                        }}
+                      >
+                        Architecture Brief <ArrowUpRight size={14} />
+                      </button>
+                      <button
+                        className="btn btn-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openCalendly();
+                        }}
+                      >
+                        Book Call <ArrowUpRight size={14} />
+                      </button>
                     </div>
                   </div>
                 </article>
@@ -1195,61 +1133,63 @@ export default function App() {
           </div>
         </section>
 
-        {/* TEAM SECTION */}
-        <section id="team" className="surface-paper band" aria-labelledby="team-title">
-          <div className="wrap team-layout">
-            <div className="founders-head">
-              <h2 id="team-title">The people on your account</h2>
-              <p>
-                Technical and creative founders on every account. The engineers who architect your system are the ones in your sprint reviews.
-              </p>
-              <div style={{ marginTop: "1rem" }}>
-                <button
-                  className="btn btn-ghost"
-                  onClick={openCalendly}
-                >
-                  <Calendar size={18} /> Meet the Founders
-                </button>
+        {/* TEAM SECTION (HIDDEN FOR EVENT - EASY RE-ENABLE) */}
+        {SHOW_FOUNDERS && (
+          <section id="team" className="surface-paper band" aria-labelledby="team-title">
+            <div className="wrap team-layout">
+              <div className="founders-head">
+                <h2 id="team-title">The people on your account</h2>
+                <p>
+                  Technical and creative founders on every account. The engineers who architect your system are the ones in your sprint reviews.
+                </p>
+                <div style={{ marginTop: "1rem" }}>
+                  <button
+                    className="btn btn-ghost"
+                    onClick={openCalendly}
+                  >
+                    <Calendar size={18} /> Meet the Founders
+                  </button>
+                </div>
+              </div>
+
+              <div className="founders">
+                <article className="founder">
+                  <div className="founder-photo">
+                    <img
+                      src="/team/akshat.webp"
+                      alt="Akshat - Co-Founder &amp; Technical Architect"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="founder-meta">
+                    <h3>Akshat</h3>
+                    <p className="founder-role">Co-Founder &amp; Technical Architect</p>
+                    <p className="founder-bio">
+                      Architects core enterprise software, CampusFlow school ERP, and white-label SaaS infrastructure. Leads full-stack engineering, databases, and cloud systems from first commit to live production.
+                    </p>
+                  </div>
+                </article>
+
+                <article className="founder">
+                  <div className="founder-photo">
+                    <img
+                      src="/team/divyansh.webp"
+                      alt="Divyansh - Co-Founder &amp; Creative Director / Outreach"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="founder-meta">
+                    <h3>Divyansh</h3>
+                    <p className="founder-role">Co-Founder &amp; Creative Director / Outreach</p>
+                    <p className="founder-bio">
+                      Directs creative strategy, brand outreach, in-house 4K cinema studio production ('khud ka production'), creator profile deals, and nationwide HackCulture collegiate hackathon networks across Indian universities.
+                    </p>
+                  </div>
+                </article>
               </div>
             </div>
-
-            <div className="founders">
-              <article className="founder">
-                <div className="founder-photo">
-                  <img
-                    src="/team/divyansh.webp"
-                    alt="Divyansh - Co-Founder &amp; Technical Architect"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="founder-meta">
-                  <h3>Divyansh</h3>
-                  <p className="founder-role">Co-Founder &amp; Technical Architect</p>
-                  <p className="founder-bio">
-                    Architects core enterprise software, CampusFlow school ERP, and white-label SaaS infrastructure. Leads full-stack engineering and cloud systems from first commit to live production.
-                  </p>
-                </div>
-              </article>
-
-              <article className="founder">
-                <div className="founder-photo">
-                  <img
-                    src="/team/akshat.webp"
-                    alt="Akshat - Co-Founder &amp; Creative Director"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="founder-meta">
-                  <h3>Akshat</h3>
-                  <p className="founder-role">Co-Founder &amp; Creative Director</p>
-                  <p className="founder-bio">
-                    Directs in-house 4K cinema studio production ('khud ka production'), creator profile deals, and nationwide HackCulture collegiate hackathon networks across Indian universities.
-                  </p>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* FAQ SECTION */}
         <section id="faq" className="surface-paper band" style={{ paddingTop: 0 }} aria-labelledby="faq-title">
@@ -1629,9 +1569,7 @@ export default function App() {
             <div style={{ display: "flex", gap: "1.5rem" }}>
               <a href="#contact">Privacy Policy</a>
               <a href="#contact">Terms of Service</a>
-              <a href="https://campusflow.smrpublicschool.in/" target="_blank" rel="noreferrer">
-                CampusFlow Live Demo
-              </a>
+              <a href="#work">Confidential Portfolio</a>
             </div>
           </div>
         </div>
@@ -1693,20 +1631,28 @@ export default function App() {
                     </div>
                   </dl>
 
-                  {activeCaseModal.liveUrl && (
-                    <div style={{ marginTop: "2rem" }}>
-                      <a
-                        className="btn"
-                        href={activeCaseModal.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ width: "100%", justifyContent: "center" }}
-                      >
-                        <span>Launch Live Demo</span>
-                        <ExternalLink size={16} />
-                      </a>
+                  <div className="confidential-badge-card" style={{ marginTop: "1.5rem", padding: "1.15rem 1.25rem", borderRadius: "var(--radius-s)", background: "color-mix(in srgb, var(--accent) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--accent)", fontWeight: 700, fontSize: "var(--t-xs)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                      <ShieldCheck size={16} /> Confidential Engagement
                     </div>
-                  )}
+                    <p style={{ marginTop: "0.4rem", fontSize: "var(--t-sm)", color: "var(--on-ink)", lineHeight: 1.5 }}>
+                      Real client work. The client’s name is kept confidential.
+                    </p>
+                  </div>
+
+                  <div style={{ marginTop: "1rem" }}>
+                    <button
+                      className="btn"
+                      onClick={() => {
+                        setActiveCaseModal(null);
+                        openCalendly();
+                      }}
+                      style={{ width: "100%", justifyContent: "center" }}
+                    >
+                      <Calendar size={16} />
+                      <span>Book Architecture Walkthrough</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div>
