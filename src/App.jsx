@@ -63,7 +63,6 @@ export default function App() {
   const stepsContainerRef = useRef(null);
   const wordmarkRef = useRef(null);
   const manifestoRef = useRef(null);
-  const manifestoTrackRef = useRef(null);
   const lenisRef = useRef(null);
   const [manifestoProgress, setManifestoProgress] = useState(0);
   const [wordmarkProximity, setWordmarkProximity] = useState(() => [0, 0, 0, 0, 0]);
@@ -167,7 +166,7 @@ export default function App() {
     }
   };
 
-  // Manifesto word-by-word illumination on scroll (doubled scroll distance to ~6-7 scrolls)
+  // Manifesto word-by-word illumination on scroll (tuned for a smooth ~1.2 scroll flow)
   useEffect(() => {
     let ticking = false;
     let lastProgress = 0;
@@ -175,16 +174,16 @@ export default function App() {
     const handleManifestoScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const track = manifestoTrackRef.current;
-          if (track) {
-            const rect = track.getBoundingClientRect();
+          const el = manifestoRef.current;
+          if (el) {
+            const rect = el.getBoundingClientRect();
             const windowHeight = window.innerHeight;
-            // Pinned track scroll distance (~195vh track height minus 1 viewport height)
-            const scrollDistance = Math.max(1, rect.height - windowHeight);
-            const stickyOffset = windowHeight * 0.24;
-            const currentScrolled = stickyOffset - rect.top;
-            const progress = Math.min(1, Math.max(0, currentScrolled / scrollDistance));
-            if (Math.abs(progress - lastProgress) > 0.008) {
+            // Increased slightly from previous (0.85 -> 0.35) to (0.88 -> 0.22)
+            // Provides smooth in-flow illumination without being too long
+            const start = windowHeight * 0.88;
+            const end = windowHeight * 0.22;
+            const progress = Math.min(1, Math.max(0, (start - rect.top) / (start - end)));
+            if (Math.abs(progress - lastProgress) > 0.01) {
               setManifestoProgress(progress);
               lastProgress = progress;
             }
@@ -831,32 +830,28 @@ export default function App() {
         </div>
 
         {/* MANIFESTO / PHILOSOPHY */}
-        <section className="surface-paper manifesto-section" aria-labelledby="about-title">
-          <div ref={manifestoTrackRef} className="manifesto-pinned-track">
-            <div className="wrap manifesto-sticky-box">
-              <h2 id="about-title" className="sr-only">About Divak</h2>
-              <p ref={manifestoRef} className="manifesto-text">
-                {manifestoWords.map((word, wIdx) => {
-                  const wordProgressStart = wIdx / manifestoWords.length;
-                  const isLit = manifestoProgress >= wordProgressStart;
-                  return (
-                    <span
-                      key={wIdx}
-                      className="manifesto-word"
-                      style={{
-                        opacity: isLit ? 1 : 0.18,
-                        color: isLit ? "var(--on-paper)" : "var(--on-paper-muted)",
-                        transition: "opacity 0.25s ease, color 0.25s ease"
-                      }}
-                    >
-                      {word}{" "}
-                    </span>
-                  );
-                })}
-              </p>
-            </div>
-          </div>
-          <div className="wrap manifesto-foot-wrap">
+        <section className="surface-paper band" aria-labelledby="about-title">
+          <div className="wrap">
+            <h2 id="about-title" className="sr-only">About Divak</h2>
+            <p ref={manifestoRef} className="manifesto-text">
+              {manifestoWords.map((word, wIdx) => {
+                const wordProgressStart = wIdx / manifestoWords.length;
+                const isLit = manifestoProgress >= wordProgressStart;
+                return (
+                  <span
+                    key={wIdx}
+                    className="manifesto-word"
+                    style={{
+                      opacity: isLit ? 1 : 0.18,
+                      color: isLit ? "var(--on-paper)" : "var(--on-paper-muted)",
+                      transition: "opacity 0.25s ease, color 0.25s ease"
+                    }}
+                  >
+                    {word}{" "}
+                  </span>
+                );
+              })}
+            </p>
             <div className="manifesto-foot">
               <div>
                 <h3>One Team, Code to Campus</h3>
