@@ -13,7 +13,9 @@ import {
   Layers,
   Terminal,
   Video,
-  Zap
+  Zap,
+  Copy,
+  Mail
 } from "lucide-react";
 
 const currentYear = new Date().getFullYear();
@@ -61,9 +63,11 @@ export default function App() {
   const stepsContainerRef = useRef(null);
   const wordmarkRef = useRef(null);
   const manifestoRef = useRef(null);
+  const manifestoTrackRef = useRef(null);
   const lenisRef = useRef(null);
   const [manifestoProgress, setManifestoProgress] = useState(0);
   const [wordmarkProximity, setWordmarkProximity] = useState(() => [0, 0, 0, 0, 0]);
+  const [emailCopied, setEmailCopied] = useState(false);
 
   // Lenis Smooth Scroll Engine (Matching Arovas Butter-Smooth Kinetic Scroll)
   useEffect(() => {
@@ -163,7 +167,7 @@ export default function App() {
     }
   };
 
-  // Manifesto word-by-word illumination on scroll (RAF throttled)
+  // Manifesto word-by-word illumination on scroll (doubled scroll distance to ~6-7 scrolls)
   useEffect(() => {
     let ticking = false;
     let lastProgress = 0;
@@ -171,14 +175,16 @@ export default function App() {
     const handleManifestoScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const el = manifestoRef.current;
-          if (el) {
-            const rect = el.getBoundingClientRect();
+          const track = manifestoTrackRef.current;
+          if (track) {
+            const rect = track.getBoundingClientRect();
             const windowHeight = window.innerHeight;
-            const start = windowHeight * 0.85;
-            const end = windowHeight * 0.35;
-            const progress = Math.min(1, Math.max(0, (start - rect.top) / (start - end)));
-            if (Math.abs(progress - lastProgress) > 0.015) {
+            // Pinned track scroll distance (~195vh track height minus 1 viewport height)
+            const scrollDistance = Math.max(1, rect.height - windowHeight);
+            const stickyOffset = windowHeight * 0.24;
+            const currentScrolled = stickyOffset - rect.top;
+            const progress = Math.min(1, Math.max(0, currentScrolled / scrollDistance));
+            if (Math.abs(progress - lastProgress) > 0.008) {
               setManifestoProgress(progress);
               lastProgress = progress;
             }
@@ -217,6 +223,39 @@ export default function App() {
     } else {
       setSelectedServices([...selectedServices, service]);
     }
+  };
+
+  const EMAIL_ADDRESS = "community.divak@gmail.com";
+
+  const openGmail = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const su = encodeURIComponent("Project Inquiry | Divak Technical Studio");
+    const body = encodeURIComponent("Hi Divak Team,\n\nWe would like to discuss a project with your team.\n\nBest regards,\n");
+    window.open(
+      `https://mail.google.com/mail/?view=cm&fs=1&to=${EMAIL_ADDRESS}&su=${su}&body=${body}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+
+  const openOutlook = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const su = encodeURIComponent("Project Inquiry | Divak Technical Studio");
+    const body = encodeURIComponent("Hi Divak Team,\n\nWe would like to discuss a project with your team.\n\nBest regards,\n");
+    window.open(
+      `https://outlook.live.com/mail/0/deeplink/compose?to=${EMAIL_ADDRESS}&subject=${su}&body=${body}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+
+  const copyEmail = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(EMAIL_ADDRESS);
+    }
+    setEmailCopied(true);
+    setTimeout(() => setEmailCopied(false), 2500);
   };
 
   const handleFormSubmit = (e) => {
@@ -792,28 +831,32 @@ export default function App() {
         </div>
 
         {/* MANIFESTO / PHILOSOPHY */}
-        <section className="surface-paper band" aria-labelledby="about-title">
-          <div className="wrap">
-            <h2 id="about-title" className="sr-only">About Divak</h2>
-            <p ref={manifestoRef} className="manifesto-text">
-              {manifestoWords.map((word, wIdx) => {
-                const wordProgressStart = wIdx / manifestoWords.length;
-                const isLit = manifestoProgress >= wordProgressStart;
-                return (
-                  <span
-                    key={wIdx}
-                    className="manifesto-word"
-                    style={{
-                      opacity: isLit ? 1 : 0.18,
-                      color: isLit ? "var(--on-paper)" : "var(--on-paper-muted)",
-                      transition: "opacity 0.25s ease, color 0.25s ease"
-                    }}
-                  >
-                    {word}{" "}
-                  </span>
-                );
-              })}
-            </p>
+        <section className="surface-paper manifesto-section" aria-labelledby="about-title">
+          <div ref={manifestoTrackRef} className="manifesto-pinned-track">
+            <div className="wrap manifesto-sticky-box">
+              <h2 id="about-title" className="sr-only">About Divak</h2>
+              <p ref={manifestoRef} className="manifesto-text">
+                {manifestoWords.map((word, wIdx) => {
+                  const wordProgressStart = wIdx / manifestoWords.length;
+                  const isLit = manifestoProgress >= wordProgressStart;
+                  return (
+                    <span
+                      key={wIdx}
+                      className="manifesto-word"
+                      style={{
+                        opacity: isLit ? 1 : 0.18,
+                        color: isLit ? "var(--on-paper)" : "var(--on-paper-muted)",
+                        transition: "opacity 0.25s ease, color 0.25s ease"
+                      }}
+                    >
+                      {word}{" "}
+                    </span>
+                  );
+                })}
+              </p>
+            </div>
+          </div>
+          <div className="wrap manifesto-foot-wrap">
             <div className="manifesto-foot">
               <div>
                 <h3>One Team, Code to Campus</h3>
@@ -974,26 +1017,6 @@ export default function App() {
                         <h3>{item.title}</h3>
                       </div>
                       <p className="work-channels">{item.channels}</p>
-                    </div>
-                    <div className="work-card-actions">
-                      <button
-                        className="btn btn-sm btn-ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveCaseModal(item);
-                        }}
-                      >
-                        Architecture Brief <ArrowUpRight size={14} />
-                      </button>
-                      <button
-                        className="btn btn-sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openCalendly();
-                        }}
-                      >
-                        Book Call <ArrowUpRight size={14} />
-                      </button>
                     </div>
                   </div>
                 </article>
@@ -1314,7 +1337,48 @@ export default function App() {
 
               <div className="contact-direct">
                 <span>Direct inquiries</span>
-                <a href="mailto:hello@divak.co">hello@divak.co</a>
+                <div className="contact-email-wrap">
+                  <a
+                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${EMAIL_ADDRESS}&su=${encodeURIComponent("Project Inquiry | Divak Technical Studio")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={openGmail}
+                    className="contact-email-link"
+                    title="Click to compose in Gmail"
+                  >
+                    {EMAIL_ADDRESS}
+                  </a>
+
+                  <div className="email-launch-actions">
+                    <button
+                      type="button"
+                      className="email-client-btn"
+                      onClick={openGmail}
+                      title="Open and compose in Gmail"
+                    >
+                      <Globe size={13} />
+                      <span>Gmail ↗</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="email-client-btn"
+                      onClick={openOutlook}
+                      title="Open and compose in Outlook Web"
+                    >
+                      <Mail size={13} />
+                      <span>Outlook ↗</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="email-client-btn"
+                      onClick={copyEmail}
+                      title="Copy email to clipboard"
+                    >
+                      {emailCopied ? <Check size={13} /> : <Copy size={13} />}
+                      <span>{emailCopied ? "Copied!" : "Copy"}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div style={{ marginTop: "1.5rem" }}>
@@ -1554,15 +1618,13 @@ export default function App() {
               <h4>Products</h4>
               <ul>
                 <li>
-                  <a href="https://campusflow.smrpublicschool.in/" target="_blank" rel="noreferrer">
-                    CampusFlow School ERP ↗
-                  </a>
+                  <a href="#work">CampusFlow School ERP</a>
                 </li>
                 <li>
-                  <a href="#products">HackCulture Hackathon OS</a>
+                  <a href="#work">HackCulture Hackathon OS</a>
                 </li>
                 <li>
-                  <a href="#products">DevRank Talent Cloud</a>
+                  <a href="#work">DevRank Talent Cloud</a>
                 </li>
                 <li>
                   <a href="#tech">White-Label SaaS Licensing</a>

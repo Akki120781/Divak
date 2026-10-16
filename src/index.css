@@ -646,6 +646,23 @@ img, svg, canvas {
 }
 
 /* MANIFESTO */
+.manifesto-section {
+  position: relative;
+  background: var(--paper);
+}
+
+.manifesto-pinned-track {
+  position: relative;
+  min-height: 195vh;
+  padding-top: clamp(2.5rem, 5vh, 4.5rem);
+}
+
+.manifesto-sticky-box {
+  position: sticky;
+  top: clamp(20vh, 26vh, 32vh);
+  z-index: 2;
+}
+
 .manifesto-text {
   font-family: var(--display);
   font-variation-settings: "wdth" 82, "wght" 500;
@@ -659,15 +676,21 @@ img, svg, canvas {
 .manifesto-word {
   margin-right: .22em;
   display: inline-block;
-  transition: opacity .4s;
+  transition: opacity .35s ease, color .35s ease;
+}
+
+.manifesto-foot-wrap {
+  position: relative;
+  z-index: 3;
 }
 
 .manifesto-foot {
   border-top: 1px solid var(--line-paper);
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2.5rem;
-  margin-top: clamp(3rem, 6vw, 6rem);
-  padding-top: 2rem;
+  margin-top: 1rem;
+  padding-top: 2.5rem;
+  padding-bottom: clamp(3rem, 6vw, 6rem);
   display: grid;
 }
 
@@ -1769,19 +1792,61 @@ img, svg, canvas {
 
 .contact-direct {
   font-size: var(--t-sm);
-  gap: .35rem;
+  gap: .5rem;
   margin-top: 2.5rem;
   display: grid;
 }
 
-.contact-direct a {
+.contact-email-wrap {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.contact-email-link {
   font-family: var(--display);
-  font-size: var(--t-lg);
+  font-size: clamp(var(--t-md), 2.2vw, var(--t-lg));
   letter-spacing: -.02em;
   text-underline-offset: 5px;
   font-weight: 600;
   text-decoration: underline;
   text-decoration-thickness: 2px;
+  color: inherit;
+  transition: opacity 0.2s ease;
+  word-break: break-all;
+}
+
+.contact-email-link:hover {
+  opacity: 0.85;
+}
+
+.email-launch-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.email-client-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent);
+  color: var(--on-ink);
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.email-client-btn:hover {
+  background: var(--ink);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .next-steps {
@@ -2280,6 +2345,13 @@ img, svg, canvas {
   }
   .manifesto-foot {
     grid-template-columns: 1fr;
+  }
+  .manifesto-pinned-track {
+    min-height: 155vh;
+    padding-top: 2rem;
+  }
+  .manifesto-sticky-box {
+    top: 18vh;
   }
   .footer-top {
     grid-template-columns: 1fr 1fr;
