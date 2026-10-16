@@ -40,6 +40,8 @@ export default function App() {
 
   // Form State
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [selectedServices, setSelectedServices] = useState([
     "Tailor-Made Custom Software",
     "CampusFlow School ERP"
@@ -257,9 +259,42 @@ export default function App() {
     setTimeout(() => setEmailCopied(false), 2500);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const res = await fetch("/api/send-brief", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          services: selectedServices,
+          budget: selectedBudget,
+          timeSlot: formData.timeSlot,
+          brief: formData.brief
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFormSubmitted(true);
+      } else {
+        setSubmitError(
+          data.error || "Could not dispatch via email service. Please check your connection or send via Gmail below."
+        );
+      }
+    } catch (err) {
+      console.error("Submission failed:", err);
+      setSubmitError(
+        "Network dispatch error. Please click below to send your details directly via Gmail."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBookingSubmit = (e) => {
@@ -1534,9 +1569,39 @@ export default function App() {
                     ></textarea>
                   </div>
 
+                  {submitError && (
+                    <div style={{ marginTop: "1rem", padding: "0.85rem 1rem", borderRadius: "var(--radius-s)", background: "rgba(220, 38, 38, 0.1)", border: "1px solid rgba(220, 38, 38, 0.3)", color: "var(--on-ink)" }}>
+                      <div style={{ fontSize: "var(--t-xs)", fontWeight: 700, color: "#e11d48", marginBottom: "0.35rem" }}>
+                        Note on Submission:
+                      </div>
+                      <p style={{ fontSize: "var(--t-xs)", margin: 0, lineHeight: 1.4 }}>
+                        {submitError}
+                      </p>
+                      <button
+                        type="button"
+                        className="btn btn-sm"
+                        style={{ marginTop: "0.75rem", background: "var(--ink)", color: "white" }}
+                        onClick={(e) => {
+                          const su = encodeURIComponent(`Project Brief from ${formData.name}`);
+                          const body = encodeURIComponent(
+                            `Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nServices: ${selectedServices.join(", ")}\nBudget: ${selectedBudget}\nPreferred Slot: ${formData.timeSlot}\n\nProject Scope:\n${formData.brief}\n`
+                          );
+                          window.open(
+                            `https://mail.google.com/mail/?view=cm&fs=1&to=${EMAIL_ADDRESS}&su=${su}&body=${body}`,
+                            "_blank",
+                            "noopener,noreferrer"
+                          );
+                        }}
+                      >
+                        <Globe size={13} />
+                        <span>Send Prefilled Draft in Gmail ↗</span>
+                      </button>
+                    </div>
+                  )}
+
                   <div className="brief-foot" style={{ marginTop: "1.5rem" }}>
-                    <button type="submit" className="btn">
-                      <span>Submit Project Brief</span>
+                    <button type="submit" className="btn" disabled={isSubmitting}>
+                      <span>{isSubmitting ? "Dispatching Brief..." : "Submit Project Brief"}</span>
                       <ArrowUpRight className="btn-icon" size={16} />
                     </button>
                     <p>Protected by mutual NDA. Zero spam, ever.</p>
